@@ -15,8 +15,8 @@ datasource db {
 model User {
   id          String    @id @default(cuid())
   email       String    @unique
-  name        String?  
-  avatarUrl   String?  
+  name        String?
+  avatarUrl   String?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   isActive    Boolean   @default(true)
@@ -36,8 +36,8 @@ model Organization {
   logoUrl     String?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-  settings    Json?     @default({})
-  limits      Json?     @default({})
+  settings    Json
+  limits      Json
   
   memberships Membership[]
   alerts      Alert[]
@@ -66,7 +66,7 @@ model ApiKey {
   name        String
   prefix      String
   hashedKey   String
-  scopes      Json?     @default([])
+  scopes      Json
   rateLimit   Int?      @default(null)
   expiresAt   DateTime?
   lastUsedAt  DateTime?
@@ -85,7 +85,7 @@ model AuditLog {
   action    String
   resource  String?
   resourceId String?
-  metadata  Json?     @default({})
+  metadata  Json
   user      User?     @relation(fields: [userId], references: [id])
   userId    String?
   ipAddress String?
@@ -133,7 +133,7 @@ model Alert {
   id          String    @id @default(cuid())
   name        String
   type        String    // query, topic, page, domain
-  config      Json?     @default({})
+  config      Json
   isActive    Boolean    @default(true)
   lastTriggeredAt DateTime?
   organization Organization @relation(fields: [organizationId], references: [id])
@@ -150,7 +150,7 @@ model Connector {
   id          String    @id @default(cuid())
   name        String
   type        String    // github, gitlab, notion, confluence, jira, slack, gdrive, s3, rss, custom
-  config      Json?     @default({})
+  config      Json
   schedule    String?   // Cron expression
   status      String    // active, paused, error, never_run
   lastRunAt   DateTime?
