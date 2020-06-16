@@ -45,6 +45,82 @@ model Organization {
   @@map("organizations")
 }
 
+model Document {
+  id          String    @id @default(cuid())
+  contentHash String    @unique
+  title       String
+  url         String
+  domain      String?
+  language    String?   // ISO 639-1
+  contentType String?   // web, code, pdf, etc.
+  publishedAt DateTime?
+  crawledAt   DateTime  @default(now())
+  indexedAt   DateTime?
+  version     Int       @default(1)
+  qualityScore Float?
+  spamScore   Float?
+  isDuplicate   Boolean   @default(false)
+  duplicateOf   String?   // self-referencing for duplicates
+  
+  @@map("documents")
+}
+
+model CodeIndex {
+  id          String    @id @default(cuid())
+  repo        String
+  filePath    String
+  symbol      String
+  language    String
+  license     String?
+  createdAt   DateTime  @default(now())
+  
+  @@map("code_index")
+}
+
+model DocumentChunk {
+  id          String    @id @default(cuid())
+  document    Document  @relation(fields: [documentId], references: [id])
+  documentId  String
+  chunkIndex  Int
+  content     String
+  tokenCount  Int
+  startOffset Int
+  endOffset   Int
+  headingPath String[]  // Hierarchy of headings
+  embedding   Float[]?  // Vector embedding for semantic search
+  
+  @@map("document_chunks")
+}
+
+model CodeIndexSymbol {
+  id          String    @id @default(cuid())
+  codeIndex   CodeIndex @relation(fields: [codeIndexId], references: [id])
+  codeIndexId String
+  symbol      String
+  language    String
+  lineNumber  Int
+  columnNumber Int
+  
+  @@map("code_index_symbols")
+}
+
+model Organization {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  description String?
+  logoUrl     String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  settings    Json
+  limits      Json
+  
+  memberships Membership[]
+  alerts      Alert[]
+  
+  @@map("organizations")
+}
+
 model Membership {
   id        String    @id @default(cuid())
   role      String    // owner, admin, operator, analyst, readonly
