@@ -28,23 +28,6 @@ model User {
   @@map("users")
 }
 
-model Organization {
-  id          String    @id @default(cuid())
-  name        String
-  slug        String    @unique
-  description String?
-  logoUrl     String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  settings    Json
-  limits      Json
-  
-  memberships Membership[]
-  alerts      Alert[]
-  
-  @@map("organizations")
-}
-
 model Document {
   id          String    @id @default(cuid())
   contentHash String    @unique
@@ -115,23 +98,6 @@ model CodeIndexLink {
   @@map("code_index_links")
 }
 
-model Organization {
-  id          String    @id @default(cuid())
-  name        String
-  slug        String    @unique
-  description String?
-  logoUrl     String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  settings    Json
-  limits      Json
-  
-  memberships Membership[]
-  alerts      Alert[]
-  
-  @@map("organizations")
-}
-
 model Membership {
   id        String    @id @default(cuid())
   role      String    // owner, admin, operator, analyst, readonly
@@ -141,10 +107,9 @@ model Membership {
   user        User      @relation(fields: [userId], references: [id])
   userId    String
   
-  organization Organization @relation(fields: [organizationId], references: [id])
-  organizationId String
+  organization String
   
-  @@unique([userId, organizationId])
+  @@unique([userId])
   @@map("memberships")
 }
 
@@ -160,9 +125,6 @@ model ApiKey {
   createdAt   DateTime  @default(now())
   createdBy   String
   revokedAt   DateTime?
-  
-  organization Organization @relation(fields: [organizationId], references: [id])
-  organizationId String
   
   @@map("api_keys")
 }
@@ -204,15 +166,6 @@ model Collection {
   indexAlias  String
   connectorId String?
   
-  organization Organization @relation(fields: [organizationId], references: [id])
-  organizationId String
-  
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  createdBy String
-  
-  documents Document[]
-  
   @@map("collections")
 }
 
@@ -223,12 +176,6 @@ model Alert {
   config      Json
   isActive    Boolean    @default(true)
   lastTriggeredAt DateTime?
-  organization Organization @relation(fields: [organizationId], references: [id])
-  organizationId String
-  
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  createdBy String
   
   @@map("alerts")
 }
@@ -243,12 +190,6 @@ model Connector {
   lastRunAt   DateTime?
   lastRunStatus String?   // success, partial, failed
   lastRunError String?
-  organization Organization @relation(fields: [organizationId], references: [id])
-  organizationId String
-  
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  createdBy String
   
   @@map("connectors")
 }
