@@ -304,7 +304,7 @@ export function generateToken(length = 32): string {
 export function generateApiKey(prefix = 'lms'): { key: string; hash: string } {
   const randomPart = randomBytes(24).toString('base64url');
   const key = `${prefix}_${randomPart}`;
-  const hash = hashApiKey(key);
+  const hash = await hashApiKey(key);
   return { key, hash };
 }
 
