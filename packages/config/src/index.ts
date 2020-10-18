@@ -305,20 +305,26 @@ export type DemoEnv = z.infer<typeof demoEnvSchema>;
 export type Env = z.infer<typeof envSchema>;
 
 /**
+ * Format a Zod validation error into a human-readable message
+ */
+function formatZodError(error: z.ZodError): string {
+  const errors = error.flatten();
+  return [
+    'Environment validation failed:',
+    ...Object.entries(errors.fieldErrors).flatMap(([field, messages]) =>
+      (messages ?? []).map((msg) => `  ${field}: ${msg}`)
+    ),
+    ...errors.formErrors.map((msg) => `  ${msg}`),
+  ].join('\n');
+}
+
+/**
  * Validate and parse environment variables
  */
 export function validateEnv(config: Record<string, string | undefined> = process.env): Env {
   const result = envSchema.safeParse(config);
   if (!result.success) {
-    const errors = result.error.flatten();
-    const message = [
-      'Environment validation failed:',
-      ...Object.entries(errors.fieldErrors).flatMap(([field, messages]) =>
-        (messages ?? []).map((msg) => `  ${field}: ${msg}`)
-      ),
-      ...errors.formErrors.map((msg) => `  ${msg}`),
-    ].join('\n');
-    throw new Error(message);
+    throw new Error(formatZodError(result.error));
   }
   return result.data;
 }
@@ -332,15 +338,7 @@ export function validateEnvPartial<T extends z.ZodRawShape>(
 ): z.infer<z.ZodObject<T>> {
   const result = schema.safeParse(config);
   if (!result.success) {
-    const errors = result.error.flatten();
-    const message = [
-      'Environment validation failed:',
-      ...Object.entries(errors.fieldErrors).flatMap(([field, messages]) =>
-        (messages ?? []).map((msg) => `  ${field}: ${msg}`)
-      ),
-      ...errors.formErrors.map((msg) => `  ${msg}`),
-    ].join('\n');
-    throw new Error(message);
+    throw new Error(formatZodError(result.error));
   }
   return result.data;
 }
