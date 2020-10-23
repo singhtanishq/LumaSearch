@@ -1,0 +1,70 @@
+name: luma-search-prod
+
+x-common-env: &common-env
+  NODE_ENV: production
+  DATABASE_URL: ${DATABASE_URL}
+  REDIS_URL: ${REDIS_URL}
+  ELASTICSEARCH_URL: ${ELASTICSEARCH_URL}
+  JWT_SECRET: ${JWT_SECRET}
+  SESSION_SECRET: ${SESSION_SECRET}
+  CSRF_SECRET: ${CSRF_SECRET}
+
+services:
+  api:
+    image: luma-search/api:${TAG:-latest}
+    restart: unless-stopped
+    environment:
+      <<: *common-env
+      API_PORT: 4000
+    ports:
+      - '127.0.0.1:4000:4000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -fs http://localhost:4000/health/live || exit 1']
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  worker:
+    image: luma-search/worker:${TAG:-latest}
+    restart: unless-stopped
+    environment:
+      <<: *common-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          memory: 2g
+
+  web:
+    image: luma-search/web:${TAG:-latest}
+    restart: unless-stopped
+    environment:
+      <<: *common-env
+      NEXT_PUBLIC_API_URL: ${PUBLIC_API_URL}
+    ports:
+      - '127.0.0.1:3000:3000'
+    depends_on:
+      - api
+
+volumes:
+  postgres-data:
+  redis-data:
+  es-data:
