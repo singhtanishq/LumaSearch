@@ -1,0 +1,4 @@
+FROM luma-base AS api
+WORKDIR /workspace/apps/api
+EXPOSE 4000
+CMD ["pnpm", "start"]

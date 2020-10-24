@@ -1,0 +1,33 @@
+# Shared base image with dependencies built.
+# Build from repo root: docker build -f infra/docker/Dockerfile.base -t luma-base .
+FROM node:20-alpine AS base
+RUN apk add --no-cache libc6-compat
+RUN corepack enable
+WORKDIR /workspace
+
+# Install pnpm workspace dependencies
+COPY pnpm-workspace.yaml package.json pnpm-lock.yaml* ./
+COPY packages/tsconfig/package.json packages/tsconfig/
+COPY packages/config/package.json packages/config/
+COPY packages/types/package.json packages/types/
+COPY packages/utils/package.json packages/utils/
+COPY packages/telemetry/package.json packages/telemetry/
+COPY packages/search-client/package.json packages/search-client/
+COPY packages/crawler-core/package.json packages/crawler-core/
+COPY packages/embeddings/package.json packages/embeddings/
+COPY packages/llm/package.json packages/llm/
+COPY packages/ranking/package.json packages/ranking/
+COPY packages/query/package.json packages/query/
+COPY packages/evidence/package.json packages/evidence/
+COPY packages/storage/package.json packages/storage/
+COPY packages/queue/package.json packages/queue/
+COPY packages/auth/package.json packages/auth/
+COPY packages/test-utils/package.json packages/test-utils/
+COPY apps/api/package.json apps/api/
+COPY apps/worker/package.json apps/worker/
+COPY apps/web/package.json apps/web/
+RUN pnpm install --frozen-lockfile || pnpm install
+
+# Copy sources and build packages
+COPY . .
+RUN pnpm --filter './packages/**' build
