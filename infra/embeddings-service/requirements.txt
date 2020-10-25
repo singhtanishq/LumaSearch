@@ -1,0 +1,5 @@
+fastapi>=0.110.0
+uvicorn[standard]>=0.29.0
+sentence-transformers>=3.0.0
+numpy>=1.26.0
+pydantic>=2.7.0
