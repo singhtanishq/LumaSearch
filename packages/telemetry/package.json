@@ -1,0 +1,36 @@
+{
+  "name": "@luma-search/telemetry",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "lint": "eslint src --ext ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "pino": "^9.1.0",
+    "pino-pretty": "^11.2.1",
+    "prom-client": "^15.1.0"
+  },
+  "devDependencies": {
+    "@luma-search/tsconfig": "workspace:*",
+    "@types/node": "^20.11.0",
+    "@types/pino": "^7.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.4.0",
+    "vitest": "^1.4.0"
+  }
+}
