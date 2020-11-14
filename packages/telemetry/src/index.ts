@@ -173,7 +173,7 @@ export async function runHealthChecks(checks: HealthCheck[]): Promise<HealthRepo
       } catch (err) {
         results[c.name] = { status: 'down', detail: err instanceof Error ? err.message : String(err) };
       }
-      if (results[c.name].status === 'down') down += 1;
+      if (results[c.name]?.status === 'down') down += 1;
     })
   );
   const anyDown = down > 0;
