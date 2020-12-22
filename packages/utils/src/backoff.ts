@@ -45,13 +45,15 @@ export async function withBackoff<T>(
  */
 export class CircuitBreaker {
   private failures = new Map<string, { count: number; openedAt?: number }>();
+  private readonly threshold: number;
+  private readonly cooldownMs: number;
 
   constructor(
     private readonly opts: { threshold?: number; cooldownMs?: number } = {}
-  ) {}
-
-  private readonly threshold = this.opts.threshold ?? 5;
-  private readonly cooldownMs = this.opts.cooldownMs ?? 60_000;
+  ) {
+    this.threshold = opts.threshold ?? 5;
+    this.cooldownMs = opts.cooldownMs ?? 60_000;
+  }
 
   isOpen(key: string): boolean {
     const state = this.failures.get(key);
