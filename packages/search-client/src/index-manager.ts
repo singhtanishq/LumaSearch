@@ -15,7 +15,10 @@ export interface IndexManagerOptions {
 }
 
 export class IndexManager {
-  constructor(private readonly client: Client, private readonly opts: IndexManagerOptions) {}
+  constructor(
+    private readonly client: Client,
+    private readonly opts: IndexManagerOptions
+  ) {}
 
   aliasName(vertical: Vertical): string {
     return verticalIndexName(this.opts.prefix, vertical);
@@ -29,7 +32,9 @@ export class IndexManager {
   }
 
   async aliasExists(vertical: Vertical): Promise<boolean> {
-    return this.client.indices.existsAlias({ name: this.aliasName(vertical) }).then((r) => r === true || Boolean((r as { body?: boolean }).body));
+    return this.client.indices
+      .existsAlias({ name: this.aliasName(vertical) })
+      .then((r) => r === true || Boolean((r as { body?: boolean }).body));
   }
 
   async getActiveIndex(vertical: Vertical): Promise<string | null> {
@@ -76,16 +81,17 @@ export class IndexManager {
   ): Promise<{ indexed: number; errors: string[] }> {
     if (documents.length === 0) return { indexed: 0, errors: [] };
     const alias = this.aliasName(vertical);
-    const body = documents.flatMap(({ id, doc }) => [
-      { index: { _index: alias, _id: id } },
-      doc,
-    ]);
+    const body = documents.flatMap(({ id, doc }) => [{ index: { _index: alias, _id: id } }, doc]);
     const res = await this.client.bulk({ operations: body, refresh: options.refresh ?? false });
-    const items = (res.body?.items ?? []) as Array<{ index?: { error?: unknown; status?: number } }>;
+    const items = (res.body?.items ?? []) as Array<{
+      index?: { error?: unknown; status?: number };
+    }>;
     const errors: string[] = [];
     for (const item of items) {
       if (item.index?.error) {
-        errors.push(typeof item.index.error === 'string' ? item.index.error : JSON.stringify(item.index.error));
+        errors.push(
+          typeof item.index.error === 'string' ? item.index.error : JSON.stringify(item.index.error)
+        );
       }
     }
     return { indexed: documents.length - errors.length, errors };
@@ -96,7 +102,10 @@ export class IndexManager {
   }
 
   async count(vertical: Vertical, query?: Record<string, unknown>): Promise<number> {
-    const res = await this.client.count({ index: this.aliasName(vertical), ...(query ? { query } : {}) });
+    const res = await this.client.count({
+      index: this.aliasName(vertical),
+      ...(query ? { query } : {}),
+    });
     return (res.body?.count as number) ?? 0;
   }
 
@@ -115,7 +124,11 @@ export class IndexManager {
   /**
    * Atomically swap alias to a new (verified) index and delete the old one.
    */
-  async swapAlias(vertical: Vertical, newIndex: string, opts: { deleteOld?: boolean } = {}): Promise<void> {
+  async swapAlias(
+    vertical: Vertical,
+    newIndex: string,
+    opts: { deleteOld?: boolean } = {}
+  ): Promise<void> {
     const alias = this.aliasName(vertical);
     const oldIndex = await this.getActiveIndex(vertical);
     const actions: Array<Record<string, unknown>> = [];
@@ -138,7 +151,11 @@ export class IndexManager {
   async indexStats(vertical: Vertical): Promise<{ docs: number; sizeBytes: number } | null> {
     try {
       const res = await this.client.indices.stats({ index: this.aliasName(vertical) });
-      const totals = (res.body as { _all?: { primaries?: { docs?: { count?: number }; store?: { size_in_bytes?: number } } } })._all?.primaries;
+      const totals = (
+        res.body as {
+          _all?: { primaries?: { docs?: { count?: number }; store?: { size_in_bytes?: number } } };
+        }
+      )._all?.primaries;
       return {
         docs: totals?.docs?.count ?? 0,
         sizeBytes: totals?.store?.size_in_bytes ?? 0,

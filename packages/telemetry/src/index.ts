@@ -4,13 +4,7 @@
  */
 import { randomUUID } from 'node:crypto';
 import pino, { Logger, LoggerOptions } from 'pino';
-import {
-  collectDefaultMetrics,
-  Counter,
-  Gauge,
-  Histogram,
-  register,
-} from 'prom-client';
+import { collectDefaultMetrics, Counter, Gauge, Histogram, register } from 'prom-client';
 
 export type LogLevel = 'fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace';
 
@@ -39,7 +33,10 @@ export function createLogger(config: LoggerConfig = {}): Logger {
   const options: LoggerOptions = {
     level: config.level ?? process.env.LOG_LEVEL ?? 'info',
     base: { service: config.service ?? 'luma-search' },
-    redact: { paths: [...DEFAULT_REDACT_PATHS, ...(config.redactPaths ?? [])], censor: '[REDACTED]' },
+    redact: {
+      paths: [...DEFAULT_REDACT_PATHS, ...(config.redactPaths ?? [])],
+      censor: '[REDACTED]',
+    },
     formatters: {
       level: (label) => ({ level: label }),
     },
@@ -171,7 +168,10 @@ export async function runHealthChecks(checks: HealthCheck[]): Promise<HealthRepo
       try {
         results[c.name] = await c.check();
       } catch (err) {
-        results[c.name] = { status: 'down', detail: err instanceof Error ? err.message : String(err) };
+        results[c.name] = {
+          status: 'down',
+          detail: err instanceof Error ? err.message : String(err),
+        };
       }
       if (results[c.name]?.status === 'down') down += 1;
     })
