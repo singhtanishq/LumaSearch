@@ -40,7 +40,7 @@ export class IndexManager {
   async getActiveIndex(vertical: Vertical): Promise<string | null> {
     try {
       const res = await this.client.indices.getAlias({ name: this.aliasName(vertical) });
-      const indices = Object.keys(res.body ?? res);
+      const indices = Object.keys(res);
       if (indices.length === 0) return null;
       // newest version wins
       return indices.sort().at(-1) ?? null;
@@ -115,7 +115,7 @@ export class IndexManager {
   async verifyIndex(indexName: string, minDocs = 1): Promise<boolean> {
     try {
       const res = await this.client.count({ index: indexName });
-      return ((res.body?.count as number) ?? 0) >= minDocs;
+      return (res.count ?? 0) >= minDocs;
     } catch {
       return false;
     }
