@@ -150,7 +150,7 @@ export class IndexManager {
     try {
       const res = await this.client.indices.stats({ index: this.aliasName(vertical) });
       const totals = (
-        res.body as {
+        res as unknown as {
           _all?: { primaries?: { docs?: { count?: number }; store?: { size_in_bytes?: number } } };
         }
       )._all?.primaries;
