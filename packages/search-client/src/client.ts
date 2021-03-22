@@ -32,12 +32,13 @@ export async function checkSearchHealth(client: Client): Promise<{
 }> {
   const started = Date.now();
   try {
-    const info = await client.info({ requestTimeout: 3000 });
-    const health = await client.cluster.health({ requestTimeout: 3000 });
+    const info = await client.info();
+    const health = await client.cluster.health();
+    const status = health.status ?? 'red';
     return {
-      status: health.body.status === 'red' ? 'down' : 'ok',
+      status: status === 'red' ? 'down' : 'ok',
       latencyMs: Date.now() - started,
-      detail: `cluster=${health.body.status} version=${info.body.version.number}`,
+      detail: `cluster=${status} version=${info.version?.number ?? 'unknown'}`,
     };
   } catch (err) {
     return {
