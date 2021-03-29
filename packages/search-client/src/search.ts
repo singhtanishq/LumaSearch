@@ -39,12 +39,22 @@ export const RANKING_PROFILES: Record<RankingProfile, RankProfileConfig> = {
   technical: {
     bm25: 1,
     vector: 0.8,
-    authorityBoostDomains: ['github.com', 'stackoverflow.com', 'developer.mozilla.org', 'arxiv.org'],
+    authorityBoostDomains: [
+      'github.com',
+      'stackoverflow.com',
+      'developer.mozilla.org',
+      'arxiv.org',
+    ],
   },
   community: {
     bm25: 1,
     vector: 0.6,
-    authorityBoostDomains: ['reddit.com', 'news.ycombinator.com', 'stackoverflow.com', 'discourse.org'],
+    authorityBoostDomains: [
+      'reddit.com',
+      'news.ycombinator.com',
+      'stackoverflow.com',
+      'discourse.org',
+    ],
   },
   documentation: {
     bm25: 1,
@@ -354,10 +364,7 @@ export function fuseReciprocalRank(
 /**
  * "More like this" body for find-similar actions.
  */
-export function buildMoreLikeThisBody(
-  docId: string,
-  limit: number
-): Record<string, unknown> {
+export function buildMoreLikeThisBody(docId: string, limit: number): Record<string, unknown> {
   return {
     size: limit,
     query: {
