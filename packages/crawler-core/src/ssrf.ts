@@ -3,7 +3,6 @@
  * Resolves the hostname first, then connects to the resolved IP with Host header
  * pinning so a DNS rebinding between check and fetch cannot occur.
  */
-import { isIP } from 'node:dns';
 import { lookup } from 'node:dns/promises';
 import net from 'node:net';
 
@@ -44,7 +43,7 @@ function inCidr(ip: string, base: string, bits: number): boolean {
 }
 
 export function isPrivateIp(ip: string): boolean {
-  if (isIP(ip) === 0) return false;
+  if (net.isIP(ip) === 0) return false;
   // IPv6 loopback/link-local/ULA/mapped IPv4
   const lower = ip.toLowerCase();
   if (lower === '::1' || lower === '::') return true;
