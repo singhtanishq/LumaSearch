@@ -70,7 +70,7 @@ export async function resolveAndCheck(
   hostname: string,
   opts: { blockPrivateIps?: boolean } = {}
 ): Promise<DnsCheckResult> {
-  if (isIP(hostname) !== 0) {
+  if (net.isIP(hostname) !== 0) {
     if (opts.blockPrivateIps !== false && isPrivateIp(hostname)) {
       return { allowed: false, reason: `blocked private IP: ${hostname}` };
     }
