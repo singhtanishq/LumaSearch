@@ -160,7 +160,6 @@ export function detectLanguage(text: string): string {
 
 export function interpretQuery(rawQuery: string): QueryInterpretation {
   const { operators, cleaned } = parseOperators(rawQuery);
-  const normalized = normalizeText(rawQuery);
   const { intent, confidence } = detectIntent(rawQuery);
   const language = operators.lang ?? detectLanguage(cleaned || rawQuery);
   const corrections = correctionCandidates(rawQuery);
