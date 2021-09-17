@@ -15,8 +15,8 @@ import type {
 } from '@luma-search/types';
 import { estimateTokens, extractSnippet, truncate } from '@luma-search/utils';
 import type { LLMProvider } from '@luma-search/llm';
-import type { Client } from '@elastic/elasticsearch';
 import { buildHybridBody, buildLexicalBody } from '@luma-search/search-client';
+import type { SearchClient } from '@luma-search/search-client';
 
 const log = createLogger({ service: 'evidence' });
 const metrics = initMetrics();
@@ -31,7 +31,7 @@ export interface AnswerEngineOptions {
 
 export class AnswerEngine {
   constructor(
-    private readonly es: Client,
+    private readonly es: SearchClient,
     private readonly llm: LLMProvider,
     private readonly opts: AnswerEngineOptions
   ) {}
@@ -59,10 +59,8 @@ export class AnswerEngine {
           offset: 0,
         });
 
-    const res = await this.es.search({
-      index: 'luma_web',
-      ...(body as never),
-    });
+    const searchArgs = { index: 'luma_web', ...body } as unknown as Parameters<SearchClient['search']>[0];
+    const res = await this.es.search(searchArgs);
     const hits = (res.hits?.hits ?? []) as Array<{
       _id?: string;
       _source?: Record<string, unknown>;
@@ -184,7 +182,7 @@ export class AnswerEngine {
     }
 
     const citations = this.extractCitations(generation.text, passages);
-    const contradictions = this.detectContradictions(passages);
+    const contradictions = AnswerEngine.detectContradictions(passages);
     const coverage = citations.length / Math.min(passages.length, 5);
 
     metrics.answerTokens.inc({ model: generation.model, kind: 'prompt' }, generation.usage.promptTokens);
@@ -197,7 +195,10 @@ export class AnswerEngine {
       contradictions: contradictions.length ? contradictions : undefined,
       coverage,
       model: generation.model,
-      tokensUsed: generation.usage,
+      tokensUsed: {
+        prompt: generation.usage.promptTokens,
+        completion: generation.usage.completionTokens,
+      },
       took: Date.now() - started,
     };
   }
