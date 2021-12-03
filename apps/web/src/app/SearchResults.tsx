@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { SearchResult } from './page';
+import { SearchResult } from '../types';
 
 interface SearchResultsProps {
   results: SearchResult[];
