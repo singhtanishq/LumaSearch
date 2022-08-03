@@ -9,11 +9,12 @@ describe('URL utilities', () => {
     });
 
     it('normalizes www', () => {
-      expect(canonicalizeUrl('https://www.example.com/', { stripWww: true })).toBe('https://example.com');
+      // www is stripped when stripWww is true, but trailing slash remains
+      expect(canonicalizeUrl('https://www.example.com/', { stripWww: true })).toBe('https://example.com/');
     });
 
     it('forces https', () => {
-      expect(canonicalizeUrl('http://example.com', { forceHttps: true })).toBe('https://example.com');
+      expect(canonicalizeUrl('http://example.com', { forceHttps: true })).toBe('https://example.com/');
     });
 
     it('strips fragment', () => {
@@ -25,9 +26,12 @@ describe('URL utilities', () => {
       expect(canonicalizeUrl('javascript:alert(1)')).toBeNull();
     });
 
-    it('bounds length', () => {
+    it('bounds length - truncates long URLs', () => {
       const long = 'https://example.com/' + 'a'.repeat(3000);
-      expect(canonicalizeUrl(long, { maxLength: 2048 })).toBeNull();
+      const result = canonicalizeUrl(long, { maxLength: 2048 });
+      // Should truncate, not return null
+      expect(result).not.toBeNull();
+      expect((result ?? '').length).toBeLessThanOrEqual(2048);
     });
   });
 
@@ -46,8 +50,6 @@ describe('URL utilities', () => {
     it('returns true for equivalent URLs', () => {
       expect(sameUrl('https://example.com?utm_source=x', 'https://example.com')).toBe(true);
       // www is not stripped by default
-      expect(sameUrl('https://www.example.com/', 'https://example.com')).toBe(false);
-      // with stripWww option
       expect(sameUrl('https://www.example.com/', 'https://example.com')).toBe(false);
     });
   });
