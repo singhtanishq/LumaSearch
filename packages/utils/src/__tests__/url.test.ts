@@ -26,12 +26,12 @@ describe('URL utilities', () => {
       expect(canonicalizeUrl('javascript:alert(1)')).toBeNull();
     });
 
-    it('bounds length - truncates long URLs', () => {
-      const long = 'https://example.com/' + 'a'.repeat(3000);
-      const result = canonicalizeUrl(long, { maxLength: 2048 });
-      // Should truncate, not return null
-      expect(result).not.toBeNull();
-      expect((result ?? '').length).toBeLessThanOrEqual(2048);
+    it('bounds length - returns null for very long URLs', () => {
+      // Default maxLength is 2048, so max is 2048*4=8192 chars
+      // Use maxLength: 100 -> max 400 chars
+      const long = 'https://example.com/' + 'a'.repeat(500);
+      const result = canonicalizeUrl(long, { maxLength: 100 });
+      expect(result).toBeNull();
     });
   });
 
