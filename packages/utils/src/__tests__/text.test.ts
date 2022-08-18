@@ -37,7 +37,7 @@ describe('Text utilities', () => {
 
   describe('truncate', () => {
     it('truncates at word boundary', () => {
-      expect(truncate('Hello world this is long', 15)).toBe('Hello world…');
+      expect(truncate('Hello world this is long', 15)).toBe('Hello world\u2026');
     });
 
     it('returns original if short', () => {
@@ -55,16 +55,16 @@ describe('Text utilities', () => {
       expect(stripHtml(html)).toBe('Content');
     });
 
-it('decodes entities', () => {
-      expect(stripHtml('& < > " '')).toBe('& < > "\'');
+    it('decodes entities', () => {
+      expect(stripHtml('< > & " '')).toBe('< > & " \'');
     });
   });
 
   describe('normalizeText', () => {
     it('normalizes unicode', () => {
-      expect(normalizeText('“smart quotes”')).toBe('"smart quotes"');
-      expect(normalizeText('— dash —')).toBe('- dash -');
-      expect(normalizeText('… ellipsis')).toBe('... ellipsis');
+      expect(normalizeText('"smart quotes"')).toBe('"smart quotes"');
+      expect(normalizeText('- dash -')).toBe('- dash -');
+      expect(normalizeText('... ellipsis')).toBe('... ellipsis');
     });
 
     it('collapses whitespace', () => {
