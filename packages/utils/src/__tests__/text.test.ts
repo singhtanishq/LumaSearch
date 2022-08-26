@@ -55,8 +55,9 @@ describe('Text utilities', () => {
       expect(stripHtml(html)).toBe('Content');
     });
 
-it('decodes entities', () => {
-      expect(stripHtml('<p>& < > " '</p>')).toBe('& < > "\'');
+    it('decodes entities', () => {
+      const input = '<p>& < > " '</p>';
+      expect(stripHtml(input)).toBe('& < > " \'');
     });
   });
 
