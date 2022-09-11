@@ -67,13 +67,20 @@ export function chunkText(text: string, options: ChunkOptions = {}): string[] {
     return chunks;
   }
 
-  // Single paragraph or no paragraphs: split by sentences directly
+  // Single paragraph or no paragraphs: split by sentences
   return splitLongParagraph(text, opts);
 }
 
 function splitLongParagraph(text: string, opts: Required<ChunkOptions>): string[] {
   const chunks: string[] = [];
+  
+  // Try to split by sentence boundaries
   const sentences = text.split(/(?<=[.!?。！？])\s+/).filter(Boolean);
+  
+  // If no sentence boundaries found, fall back to word-based chunking
+  if (sentences.length <= 1) {
+    return chunkByWords(text, opts);
+  }
 
   let window: string[] = [];
   let windowTokens = 0;
@@ -110,12 +117,50 @@ function splitLongParagraph(text: string, opts: Required<ChunkOptions>): string[
   return chunks;
 }
 
+function chunkByWords(text: string, opts: Required<ChunkOptions>): string[] {
+  const words = text.split(/\s+/).filter(Boolean);
+  const chunks: string[] = [];
+  let window: string[] = [];
+  let windowTokens = 0;
+
+  for (const word of words) {
+    const wt = estimateTokens(word);
+    if (windowTokens + wt > opts.maxTokens && window.length > 0) {
+      const joined = window.join(' ');
+      if (joined.length >= opts.minChunkChars) chunks.push(joined);
+
+      // Keep tail for overlap
+      const keepFrom = Math.max(0, windowTokens - opts.overlapTokens);
+      let kept: string[] = [];
+      let keptTokens = 0;
+      for (let i = window.length - 1; i >= 0; i--) {
+        keptTokens += estimateTokens(window[i]!);
+        if (windowTokens - keptTokens <= keepFrom) {
+          kept = window.slice(i);
+          break;
+        }
+      }
+      window = kept;
+      windowTokens = keptTokens;
+    }
+    window.push(word);
+    windowTokens += wt;
+  }
+
+  if (window.length > 0) {
+    const joined = window.join(' ');
+    if (joined.length >= opts.minChunkChars) chunks.push(joined);
+  }
+
+  return chunks;
+}
+
 /**
  * Strip HTML tags and decode common entities for snippet generation.
  * Entity decoding happens BEFORE tag removal to preserve < > etc.
  */
 export function stripHtml(html: string): string {
-  // First decode entities (but not inside tags)
+  // First decode entities
   let text = html
     .replace(/&nbsp;/g, ' ')
     .replace(/&/g, '&')
@@ -167,7 +212,7 @@ export function extractSnippet(content: string, query: string, maxLength = 160):
       bestPos = pos;
     }
   }
-  if (bestPos <= 0 && bestScore === 0) return truncate(content, maxLength);
+  if (bestPos < 0 && bestScore === 0) return truncate(content, maxLength);
   const start = Math.max(0, bestPos - 20);
   return (start > 0 ? '…' : '') + truncate(content.slice(start, start + maxLength + 20), maxLength);
 }
