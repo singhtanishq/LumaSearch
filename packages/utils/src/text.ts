@@ -157,10 +157,10 @@ function chunkByWords(text: string, opts: Required<ChunkOptions>): string[] {
 
 /**
  * Strip HTML tags and decode common entities for snippet generation.
- * Entity decoding happens BEFORE tag removal to preserve < > etc.
+ * Preserves literal < > characters that aren't part of valid HTML tags.
  */
 export function stripHtml(html: string): string {
-  // First decode entities
+  // First decode entities (but only the common ones)
   let text = html
     .replace(/&nbsp;/g, ' ')
     .replace(/&/g, '&')
@@ -170,12 +170,13 @@ export function stripHtml(html: string): string {
     .replace(/'/g, "'")
     .replace(/'/g, "'");
 
-  // Remove script/style content entirely
+  // Remove script/style content entirely (these are always valid tags)
   text = text.replace(/<script[\s\S]*?<\/script>/gi, ' ');
   text = text.replace(/<style[\s\S]*?<\/style>/gi, ' ');
 
-  // Remove remaining tags
-  text = text.replace(/<[^>]+>/g, ' ');
+  // Remove HTML tags but preserve standalone < and > characters
+  // Match tags like <p>, <div class="...">, <br/>, etc. but not standalone < >
+  text = text.replace(/<\/?[a-zA-Z][^>]*>/g, ' ');
 
   // Clean up whitespace
   return text.replace(/\s+/g, ' ').trim();
