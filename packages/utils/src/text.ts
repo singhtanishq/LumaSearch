@@ -194,6 +194,7 @@ export function truncate(text: string, maxLength: number): string {
 
 /**
  * Extract a query-aware snippet from content around best matching region.
+ * Ensures matched terms are preserved in the output.
  */
 export function extractSnippet(content: string, query: string, maxLength = 160): string {
   if (!query) return truncate(content, maxLength);
@@ -214,8 +215,22 @@ export function extractSnippet(content: string, query: string, maxLength = 160):
     }
   }
   if (bestPos < 0 && bestScore === 0) return truncate(content, maxLength);
+  
+  // Extend window to include full matched terms
   const start = Math.max(0, bestPos - 20);
-  return (start > 0 ? '…' : '') + truncate(content.slice(start, start + maxLength + 20), maxLength);
+  let end = bestPos + maxLength + 20;
+  
+  // Extend end to include any matched terms that cross the boundary
+  for (const term of terms) {
+    const termIdx = lower.indexOf(term, bestPos);
+    if (termIdx >= 0 && termIdx + term.length > end) {
+      end = termIdx + term.length;
+    }
+  }
+  
+  const snippet = content.slice(start, end);
+  const prefix = start > 0 ? '…' : '';
+  return prefix + truncate(snippet, maxLength);
 }
 
 /**
