@@ -11,7 +11,7 @@ export interface ChunkOptions {
 const DEFAULT_CHUNK: Required<ChunkOptions> = {
   maxTokens: 220,
   overlapTokens: 40,
-  minChunkChars: 40,
+  minChunkChars: 10,
 };
 
 /**
