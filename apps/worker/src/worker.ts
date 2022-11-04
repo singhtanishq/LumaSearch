@@ -18,8 +18,6 @@ const metrics = initMetrics();
 const env = validateEnv();
 const crawlerEnv = validateEnv(CrawlerEnv);
 const llmEnv = validateEnv(LLMEnv);
-const searchEnv = validateEnv(SearchEnv);
-const telemetryEnv = validateEnv(TelemetryEnv);
 
 // ─── Shared clients ──────────────────────────────────────────────────────────
 
