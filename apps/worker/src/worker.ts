@@ -226,7 +226,7 @@ async function processCrawlParse(job: { data: IngestJobData & { depth: number; m
     });
 
     // Chunk text for embedding
-    const { chunkText } = require('@luma-search/utils');
+    const { chunkText } = await import('@luma-search/utils');
     const chunks = chunkText(parsed.text, { maxTokens: 220, overlapTokens: 40 });
 
     await prisma.documentChunk.createMany({
