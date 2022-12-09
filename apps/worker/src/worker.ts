@@ -184,8 +184,9 @@ async function processCrawlParse(job: { data: IngestJobData & { depth: number; m
     // Create document
     const { createHash } = await import('node:crypto');
     const contentHash = createHash('sha256').update(html).digest('hex');
+    // Simhash is computed but not currently stored; keeping for future dedup
     const { simhash } = await import('@luma-search/utils');
-    const shash = simhash(parsed.text);
+    simhash(parsed.text);
 
     const doc = await prisma.document.upsert({
       where: { url: finalUrl },
