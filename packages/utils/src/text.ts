@@ -244,12 +244,10 @@ function truncatePreservingTerms(text: string, maxLength: number, terms: string[
   // Find positions of all terms in the text
   const termPositions: Array<{ start: number; end: number }> = [];
   for (const term of terms) {
-    let idx = 0;
-    while (true) {
-      idx = lower.indexOf(term, idx);
-      if (idx === -1) break;
+    let idx = lower.indexOf(term, 0);
+    while (idx !== -1) {
       termPositions.push({ start: idx, end: idx + term.length });
-      idx += term.length;
+      idx = lower.indexOf(term, idx + term.length);
     }
   }
   
