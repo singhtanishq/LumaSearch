@@ -283,7 +283,7 @@ function truncatePreservingTerms(text: string, maxLength: number, terms: string[
   
   // If no good window found, use first term
   if (bestWindow.score === 0 && termPositions.length > 0) {
-    const firstTp = termPositions[0];
+    const firstTp = termPositions[0]!;
     bestWindow.start = Math.max(0, firstTp.start - 20);
     bestWindow.end = Math.min(text.length, bestWindow.start + maxLength);
   }
