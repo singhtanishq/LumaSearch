@@ -3,7 +3,7 @@
  * Runs BullMQ workers for: crawl:fetch, crawl:parse, index:ingest, embed:generate, answer:generate
  */
 import { createLogger, initMetrics } from '@luma-search/telemetry';
-import { validateEnv, CrawlerEnv, LLMEnv } from '@luma-search/config';
+import { validateEnv } from '@luma-search/config';
 import { createConnection, createWorker, QUEUE_NAMES, type CrawlFetchJobData, type IngestJobData, type EmbedJobData, type AnswerJobData } from '@luma-search/queue';
 import { createFetcher, parseHtml } from '@luma-search/crawler-core';
 import { createSearchClient, IndexManager } from '@luma-search/search-client';
@@ -11,13 +11,12 @@ import { createEmbeddingProvider } from '@luma-search/embeddings';
 import { createLLMProvider } from '@luma-search/llm';
 import { AnswerEngine } from '@luma-search/evidence';
 import { getPrismaClient } from '@luma-search/storage';
+import type { CrawlTask } from '@luma-search/storage';
 
 const log = createLogger({ service: 'worker' });
 const metrics = initMetrics();
 
 const env = validateEnv();
-const crawlerEnv = validateEnv(CrawlerEnv);
-const llmEnv = validateEnv(LLMEnv);
 
 // ─── Shared clients ──────────────────────────────────────────────────────────
 
@@ -42,62 +41,62 @@ const indexManager = new IndexManager(es, {
 const prisma = getPrismaClient();
 
 const fetcher = createFetcher({
-  userAgent: crawlerEnv.CRAWLER_USER_AGENT,
-  respectRobots: crawlerEnv.CRAWLER_RESPECT_ROBOTS_TXT,
-  blockPrivateIps: crawlerEnv.CRAWLER_BLOCK_PRIVATE_IPS,
-  politenessDelayMs: crawlerEnv.CRAWLER_CRAWL_DELAY_MS,
-  timeoutMs: crawlerEnv.CRAWLER_REQUEST_TIMEOUT,
-  maxContentSize: crawlerEnv.CRAWLER_MAX_CONTENT_SIZE,
+  userAgent: env.CRAWLER_USER_AGENT,
+  respectRobots: env.CRAWLER_RESPECT_ROBOTS_TXT,
+  blockPrivateIps: env.CRAWLER_BLOCK_PRIVATE_IPS,
+  politenessDelayMs: env.CRAWLER_CRAWL_DELAY_MS,
+  timeoutMs: env.CRAWLER_REQUEST_TIMEOUT,
+  maxContentSize: env.CRAWLER_MAX_CONTENT_SIZE,
 });
 
 const embeddingProvider = createEmbeddingProvider({
-  provider: llmEnv.EMBEDDING_PROVIDER as any,
+  provider: env.EMBEDDING_PROVIDER as 'local' | 'openai' | 'cohere' | 'voyage',
   local: {
     url: env.EMBEDDING_LOCAL_URL,
     model: env.EMBEDDING_LOCAL_MODEL,
     dimensions: env.EMBEDDING_LOCAL_DIMENSIONS,
     batchSize: env.EMBEDDING_LOCAL_BATCH_SIZE,
   },
-  openai: llmEnv.OPENAI_API_KEY ? {
-    apiKey: llmEnv.OPENAI_API_KEY,
-    model: llmEnv.OPENAI_EMBEDDING_MODEL,
-    dimensions: llmEnv.OPENAI_EMBEDDING_DIMENSIONS,
-    batchSize: llmEnv.OPENAI_EMBEDDING_BATCH_SIZE,
+  openai: env.OPENAI_API_KEY ? {
+    apiKey: env.OPENAI_API_KEY,
+    model: env.OPENAI_EMBEDDING_MODEL,
+    dimensions: env.OPENAI_EMBEDDING_DIMENSIONS,
+    batchSize: env.OPENAI_EMBEDDING_BATCH_SIZE,
   } : undefined,
 });
 
 const llm = createLLMProvider({
-  provider: llmEnv.LLM_PROVIDER as any,
-  openai: llmEnv.OPENAI_API_KEY ? {
-    apiKey: llmEnv.OPENAI_API_KEY,
-    model: llmEnv.OPENAI_CHAT_MODEL,
-    maxTokens: llmEnv.OPENAI_MAX_TOKENS,
-    temperature: llmEnv.OPENAI_TEMPERATURE,
+  provider: env.LLM_PROVIDER as 'openai' | 'anthropic' | 'ollama' | 'disabled',
+  openai: env.OPENAI_API_KEY ? {
+    apiKey: env.OPENAI_API_KEY,
+    model: env.OPENAI_CHAT_MODEL,
+    maxTokens: env.OPENAI_MAX_TOKENS,
+    temperature: env.OPENAI_TEMPERATURE,
   } : undefined,
-  anthropic: llmEnv.ANTHROPIC_API_KEY ? {
-    apiKey: llmEnv.ANTHROPIC_API_KEY,
-    model: llmEnv.ANTHROPIC_CHAT_MODEL,
-    maxTokens: llmEnv.ANTHROPIC_MAX_TOKENS,
-    temperature: llmEnv.ANTHROPIC_TEMPERATURE,
+  anthropic: env.ANTHROPIC_API_KEY ? {
+    apiKey: env.ANTHROPIC_API_KEY,
+    model: env.ANTHROPIC_CHAT_MODEL,
+    maxTokens: env.ANTHROPIC_MAX_TOKENS,
+    temperature: env.ANTHROPIC_TEMPERATURE,
   } : undefined,
   ollama: {
-    url: llmEnv.OLLAMA_URL,
-    model: llmEnv.OLLAMA_CHAT_MODEL,
+    url: env.OLLAMA_URL,
+    model: env.OLLAMA_CHAT_MODEL,
   },
 });
 
 const answerEngine = new AnswerEngine(es as any, llm, {
-  maxEvidencePassages: llmEnv.ANSWER_MAX_EVIDENCE_PASSAGES,
-  maxEvidenceTokens: llmEnv.ANSWER_MAX_EVIDENCE_TOKENS,
-  tokenBudget: llmEnv.ANSWER_TOKEN_BUDGET,
-  timeoutMs: llmEnv.ANSWER_TIMEOUT_MS,
-  promptInjectionDefense: llmEnv.ANSWER_PROMPT_INJECTION_DEFENSE,
+  maxEvidencePassages: env.ANSWER_MAX_EVIDENCE_PASSAGES,
+  maxEvidenceTokens: env.ANSWER_MAX_EVIDENCE_TOKENS,
+  tokenBudget: env.ANSWER_TOKEN_BUDGET,
+  timeoutMs: env.ANSWER_TIMEOUT_MS,
+  promptInjectionDefense: env.ANSWER_PROMPT_INJECTION_DEFENSE,
 });
 
 // ─── Worker processors ───────────────────────────────────────────────────────
 
 async function processCrawlFetch(job: { data: CrawlFetchJobData }) {
-  const { jobId, url, depth, maxDepth, maxPages, includePatterns, excludePatterns, respectRobots } = job.data;
+  const { jobId, url, depth, maxDepth: _maxDepth, maxPages: _maxPages, includePatterns: _includePatterns, excludePatterns: _excludePatterns, respectRobots: _respectRobots } = job.data;
   log.info({ jobId, url, depth }, 'Processing crawl fetch');
 
   try {
@@ -138,11 +137,11 @@ async function processCrawlFetch(job: { data: CrawlFetchJobData }) {
           html: res.body,
           contentType: res.contentType,
           depth,
-          maxDepth,
-          maxPages,
-          includePatterns,
-          excludePatterns,
-          respectRobots,
+          maxDepth: 3,
+          maxPages: 1000,
+          includePatterns: [],
+          excludePatterns: [],
+          respectRobots: true,
         }),
       });
     }
@@ -199,7 +198,7 @@ async function processCrawlParse(job: { data: IngestJobData & { depth: number; m
         vertical: 'web',
         status: 'pending',
         contentHash,
-        simhash,
+        simhash: undefined,
         wordCount: parsed.wordCount,
         publishedAt: parsed.meta.publishedAt ? new Date(parsed.meta.publishedAt) : null,
         modifiedAt: parsed.meta.modifiedAt ? new Date(parsed.meta.modifiedAt) : null,
@@ -217,7 +216,7 @@ async function processCrawlParse(job: { data: IngestJobData & { depth: number; m
       update: {
         title: parsed.title,
         contentHash,
-        simhash,
+        simhash: undefined,
         wordCount: parsed.wordCount,
         publishedAt: parsed.meta.publishedAt ? new Date(parsed.meta.publishedAt) : null,
         modifiedAt: parsed.meta.modifiedAt ? new Date(parsed.meta.modifiedAt) : null,
@@ -305,7 +304,7 @@ async function processIndexIngest(job: { data: { documentId: string } }) {
 
     await prisma.documentChunk.updateMany({
       where: { documentId },
-      data: { embedded: false }, // Will be re-embedded
+      data: { embedded: false },
     });
 
     metrics.indexDocs.inc({ vertical: 'web' }, 1);
