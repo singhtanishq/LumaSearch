@@ -212,6 +212,12 @@ importers:
       '@luma-search/embeddings':
         specifier: workspace:*
         version: link:../../packages/embeddings
+      '@luma-search/evidence':
+        specifier: workspace:*
+        version: link:../../packages/evidence
+      '@luma-search/llm':
+        specifier: workspace:*
+        version: link:../../packages/llm
       '@luma-search/queue':
         specifier: workspace:*
         version: link:../../packages/queue
