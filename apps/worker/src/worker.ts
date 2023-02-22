@@ -11,7 +11,6 @@ import { createEmbeddingProvider } from '@luma-search/embeddings';
 import { createLLMProvider } from '@luma-search/llm';
 import { AnswerEngine } from '@luma-search/evidence';
 import { getPrismaClient } from '@luma-search/storage';
-import type { CrawlTask } from '@luma-search/storage';
 
 const log = createLogger({ service: 'worker' });
 const metrics = initMetrics();
