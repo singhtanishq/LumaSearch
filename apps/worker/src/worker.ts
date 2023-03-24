@@ -191,10 +191,10 @@ async function processCrawlParse(job: { data: IngestJobData & { depth: number; m
       where: { url: finalUrl },
       create: {
         url: finalUrl,
-        canonicalUrl: parsed.meta.canonical || finalUrl,
+        canonicalUrl: parsed.meta.canonical ?? finalUrl,
         title: parsed.title,
         domain: new URL(finalUrl).hostname,
-        language: parsed.meta.language,
+        language: parsed.meta.language ?? 'en',
         vertical: 'web',
         status: 'pending',
         contentHash,
