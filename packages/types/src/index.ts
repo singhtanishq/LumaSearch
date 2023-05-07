@@ -200,7 +200,7 @@ export interface SearchDebug {
 
 // ─── LLM Providers ───────────────────────────────────────────────────────────
 
-export type LLMProviderKind = 'openai' | 'anthropic' | 'ollama' | 'vertex' | 'bedrock' | 'disabled';
+export type LLMProviderKind = import('@luma-search/llm').LLMProviderKind;
 
 // ─── AI Answers & Evidence ───────────────────────────────────────────────────
 
