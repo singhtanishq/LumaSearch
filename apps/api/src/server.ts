@@ -5,7 +5,7 @@ import Fastify, { FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
-import { validateEnv } from '@luma-search/config';
+import { validateEnv, searchEnvSchema, llmEnvSchema } from '@luma-search/config';
 import { createLogger, initMetrics, runHealthChecks, HealthCheck } from '@luma-search/telemetry';
 import { createSearchClient, checkSearchHealth, IndexManager, buildHybridBody, buildLexicalBody } from '@luma-search/search-client';
 import { createPrismaClient, checkDbHealth } from '@luma-search/storage';
@@ -13,7 +13,7 @@ import { createLLMProvider } from '@luma-search/llm';
 import { AnswerEngine } from '@luma-search/evidence';
 import { interpretQuery, filtersFromOperators } from '@luma-search/query';
 import { canonicalizeUrl } from '@luma-search/utils';
-import type { SearchResponse, SearchFilters, RankingProfile } from '@luma-search/types';
+import type { SearchResponse, SearchFilters, RankingProfile, LLMProviderKind } from '@luma-search/types';
 
 const log = createLogger({ service: 'api' });
 const metrics = initMetrics();
