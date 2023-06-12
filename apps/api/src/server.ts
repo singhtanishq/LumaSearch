@@ -21,8 +21,8 @@ const metrics = initMetrics();
 // ─── Environment & clients ──────────────────────────────────────────────────
 
 const env = validateEnv();
-const _searchEnv = validateEnv(SearchEnv);
-const llmEnv = validateEnv(LLMEnv);
+const _searchEnv = validateEnv(searchEnvSchema);
+const llmEnv = validateEnv(llmEnvSchema);
 
 const es = createSearchClient({
   url: env.ELASTICSEARCH_URL,
