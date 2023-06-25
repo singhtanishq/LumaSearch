@@ -5,7 +5,7 @@ import Fastify, { FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
-import { validateEnv, validateEnvPartial, searchEnvSchema, llmEnvSchema, type SearchEnv, type LLMEnv } from '@luma-search/config';
+import { validateEnv, validateEnvPartial, searchEnvSchema, llmEnvSchema, queueEnvSchema, type SearchEnv, type LLMEnv, type QueueEnv } from '@luma-search/config';
 import { createLogger, initMetrics, runHealthChecks, HealthCheck } from '@luma-search/telemetry';
 import { createSearchClient, checkSearchHealth, IndexManager, buildHybridBody, buildLexicalBody } from '@luma-search/search-client';
 import { createPrismaClient, checkDbHealth } from '@luma-search/storage';
