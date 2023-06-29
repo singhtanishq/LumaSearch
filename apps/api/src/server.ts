@@ -23,6 +23,7 @@ const metrics = initMetrics();
 const env = validateEnv();
 const _searchEnv = validateEnvPartial(searchEnvSchema);
 const llmEnv = validateEnvPartial(llmEnvSchema);
+const _queueEnv = validateEnvPartial(queueEnvSchema);
 
 const es = createSearchClient({
   url: env.ELASTICSEARCH_URL,
