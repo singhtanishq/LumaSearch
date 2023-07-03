@@ -85,8 +85,8 @@ async function buildServer(): Promise<FastifyInstance> {
   });
 
   await server.register(rateLimit, {
-    max: _searchEnv.RATE_LIMIT_MAX_REQUESTS,
-    timeWindow: _searchEnv.RATE_LIMIT_WINDOW_MS,
+    max: _queueEnv.QUEUE_RATE_LIMIT_MAX,
+    timeWindow: _queueEnv.QUEUE_RATE_LIMIT_WINDOW,
     keyGenerator: (req) => req.ip,
   });
 
