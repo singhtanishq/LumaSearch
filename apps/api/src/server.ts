@@ -182,7 +182,7 @@ async function buildServer(): Promise<FastifyInstance> {
       query: q,
       interpretation,
       results,
-      total: (res.hits?.total as { value: number } | number)?.value ?? hits.length,
+      total: typeof res.hits?.total === 'object' && res.hits?.total?.value ? res.hits.total.value : (typeof res.hits?.total === 'number' ? res.hits.total : hits.length),
       took: Date.now() - started,
       profile,
     };
