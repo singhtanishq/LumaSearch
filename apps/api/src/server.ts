@@ -60,8 +60,8 @@ const answerEngine = new AnswerEngine(es as any, llm, {
 
 // ─── Server setup ───────────────────────────────────────────────────────────
 
-async function buildServer(): Promise<FastifyInstance<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>>> {
-  const server = Fastify({
+async function buildServer(): Promise<FastifyInstance<RawServerDefault, RawRequestDefaultExpression, RawReplyDefaultExpression>> {
+  const server = Fastify<RawServerDefault, RawRequestDefaultExpression, RawReplyDefaultExpression>({
     logger: log,
     bodyLimit: 1024 * 1024, // 1MB
   });
