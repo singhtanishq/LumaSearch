@@ -26,19 +26,20 @@ pnpm dev
 
 ## Services
 
-| Service | URL | Description |
-|---------|-----|-------------|
-| Web UI | http://localhost:3000 | Search interface |
-| API | http://localhost:4000 | REST API |
-| Admin | http://localhost:4001 | Admin dashboard |
-| Elasticsearch | http://localhost:9200 | Search engine |
-| Embeddings | http://localhost:8000 | Local embedding service |
+| Service       | URL                   | Description             |
+| ------------- | --------------------- | ----------------------- |
+| Web UI        | http://localhost:3000 | Search interface        |
+| API           | http://localhost:4000 | REST API                |
+| Admin         | http://localhost:4001 | Admin dashboard         |
+| Elasticsearch | http://localhost:9200 | Search engine           |
+| Embeddings    | http://localhost:8000 | Local embedding service |
 
 ## Configuration
 
 Copy `.env.example` to `.env` and customize. See [Configuration Reference](docs/configuration.md) for all options.
 
 Key variables:
+
 ```bash
 # Required for production
 JWT_SECRET=your-32-char-secret
@@ -53,6 +54,7 @@ OPENAI_API_KEY=sk-...
 ## Architecture
 
 See [Architecture Documentation](docs/architecture.md) for details on:
+
 - Package structure and boundaries
 - Data flows (search, answer, crawl)
 - Elasticsearch index strategy
@@ -109,33 +111,34 @@ curl -X POST http://localhost:4000/api/v1/crawl/jobs \
 
 ## Search Operators
 
-| Operator | Example | Description |
-|----------|---------|-------------|
-| `site:` | `site:github.com` | Restrict to domain |
-| `filetype:` | `filetype:pdf` | File extension filter |
-| `intitle:` | `intitle:typescript` | Title must contain |
-| `inurl:` | `inurl:api` | URL must contain |
-| `before:` | `before:2024-01-01` | Published before date |
-| `after:` | `after:2023-01-01` | Published after date |
-| `lang:` | `lang:en` | Language filter |
-| `"phrase"` | `"exact phrase"` | Exact phrase match |
-| `-term` | `-deprecated` | Exclude term |
+| Operator    | Example              | Description           |
+| ----------- | -------------------- | --------------------- |
+| `site:`     | `site:github.com`    | Restrict to domain    |
+| `filetype:` | `filetype:pdf`       | File extension filter |
+| `intitle:`  | `intitle:typescript` | Title must contain    |
+| `inurl:`    | `inurl:api`          | URL must contain      |
+| `before:`   | `before:2024-01-01`  | Published before date |
+| `after:`    | `after:2023-01-01`   | Published after date  |
+| `lang:`     | `lang:en`            | Language filter       |
+| `"phrase"`  | `"exact phrase"`     | Exact phrase match    |
+| `-term`     | `-deprecated`        | Exclude term          |
 
 ## Ranking Profiles
 
-| Profile | Use Case |
-|---------|----------|
-| `fastest` | Pure BM25, minimal processing |
-| `hybrid` | BM25 + vector (default) |
-| `recent` | Heavy freshness boost |
+| Profile           | Use Case                        |
+| ----------------- | ------------------------------- |
+| `fastest`         | Pure BM25, minimal processing   |
+| `hybrid`          | BM25 + vector (default)         |
+| `recent`          | Heavy freshness boost           |
 | `primary-sources` | Boost .gov, .edu, official docs |
-| `technical` | Boost code, technical docs |
-| `documentation` | Boost official docs |
-| `research` | Maximize recall + rerank |
+| `technical`       | Boost code, technical docs      |
+| `documentation`   | Boost official docs             |
+| `research`        | Maximize recall + rerank        |
 
 ## Extending
 
 ### Custom Embedding Provider
+
 ```typescript
 import { EmbeddingProvider } from '@luma-search/embeddings';
 
@@ -147,6 +150,7 @@ class MyEmbeddingProvider implements EmbeddingProvider {
 ```
 
 ### Custom LLM Provider
+
 ```typescript
 import { LLMProvider } from '@luma-search/llm';
 
