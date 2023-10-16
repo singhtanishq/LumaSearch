@@ -4,7 +4,15 @@
  */
 import { createLogger, initMetrics } from '@luma-search/telemetry';
 import { validateEnv } from '@luma-search/config';
-import { createConnection, createWorker, QUEUE_NAMES, type CrawlFetchJobData, type IngestJobData, type EmbedJobData, type AnswerJobData } from '@luma-search/queue';
+import {
+  createConnection,
+  createWorker,
+  QUEUE_NAMES,
+  type CrawlFetchJobData,
+  type IngestJobData,
+  type EmbedJobData,
+  type AnswerJobData,
+} from '@luma-search/queue';
 import { createFetcher, parseHtml } from '@luma-search/crawler-core';
 import { createSearchClient, IndexManager } from '@luma-search/search-client';
 import { createEmbeddingProvider } from '@luma-search/embeddings';
@@ -56,28 +64,34 @@ const embeddingProvider = createEmbeddingProvider({
     dimensions: env.EMBEDDING_LOCAL_DIMENSIONS,
     batchSize: env.EMBEDDING_LOCAL_BATCH_SIZE,
   },
-  openai: env.OPENAI_API_KEY ? {
-    apiKey: env.OPENAI_API_KEY,
-    model: env.OPENAI_EMBEDDING_MODEL,
-    dimensions: env.OPENAI_EMBEDDING_DIMENSIONS,
-    batchSize: env.OPENAI_EMBEDDING_BATCH_SIZE,
-  } : undefined,
+  openai: env.OPENAI_API_KEY
+    ? {
+        apiKey: env.OPENAI_API_KEY,
+        model: env.OPENAI_EMBEDDING_MODEL,
+        dimensions: env.OPENAI_EMBEDDING_DIMENSIONS,
+        batchSize: env.OPENAI_EMBEDDING_BATCH_SIZE,
+      }
+    : undefined,
 });
 
 const llm = createLLMProvider({
   provider: env.LLM_PROVIDER as 'openai' | 'anthropic' | 'ollama' | 'disabled',
-  openai: env.OPENAI_API_KEY ? {
-    apiKey: env.OPENAI_API_KEY,
-    model: env.OPENAI_CHAT_MODEL,
-    maxTokens: env.OPENAI_MAX_TOKENS,
-    temperature: env.OPENAI_TEMPERATURE,
-  } : undefined,
-  anthropic: env.ANTHROPIC_API_KEY ? {
-    apiKey: env.ANTHROPIC_API_KEY,
-    model: env.ANTHROPIC_CHAT_MODEL,
-    maxTokens: env.ANTHROPIC_MAX_TOKENS,
-    temperature: env.ANTHROPIC_TEMPERATURE,
-  } : undefined,
+  openai: env.OPENAI_API_KEY
+    ? {
+        apiKey: env.OPENAI_API_KEY,
+        model: env.OPENAI_CHAT_MODEL,
+        maxTokens: env.OPENAI_MAX_TOKENS,
+        temperature: env.OPENAI_TEMPERATURE,
+      }
+    : undefined,
+  anthropic: env.ANTHROPIC_API_KEY
+    ? {
+        apiKey: env.ANTHROPIC_API_KEY,
+        model: env.ANTHROPIC_CHAT_MODEL,
+        maxTokens: env.ANTHROPIC_MAX_TOKENS,
+        temperature: env.ANTHROPIC_TEMPERATURE,
+      }
+    : undefined,
   ollama: {
     url: env.OLLAMA_URL,
     model: env.OLLAMA_CHAT_MODEL,
@@ -95,7 +109,16 @@ const answerEngine = new AnswerEngine(es as any, llm, {
 // ─── Worker processors ───────────────────────────────────────────────────────
 
 async function processCrawlFetch(job: { data: CrawlFetchJobData }) {
-  const { jobId, url, depth, maxDepth: _maxDepth, maxPages: _maxPages, includePatterns: _includePatterns, excludePatterns: _excludePatterns, respectRobots: _respectRobots } = job.data;
+  const {
+    jobId,
+    url,
+    depth,
+    maxDepth: _maxDepth,
+    maxPages: _maxPages,
+    includePatterns: _includePatterns,
+    excludePatterns: _excludePatterns,
+    respectRobots: _respectRobots,
+  } = job.data;
   log.info({ jobId, url, depth }, 'Processing crawl fetch');
 
   try {
@@ -159,8 +182,29 @@ async function processCrawlFetch(job: { data: CrawlFetchJobData }) {
   }
 }
 
-async function processCrawlParse(job: { data: IngestJobData & { depth: number; maxDepth: number; maxPages: number; includePatterns?: string[]; excludePatterns?: string[]; respectRobots: boolean } }) {
-  const { jobId, url, finalUrl: finalUrlFromJob, html, contentType: _contentType, depth, maxDepth: _maxDepth, maxPages: _maxPages, includePatterns: _includePatterns, excludePatterns: _excludePatterns, respectRobots: _respectRobots } = job.data;
+async function processCrawlParse(job: {
+  data: IngestJobData & {
+    depth: number;
+    maxDepth: number;
+    maxPages: number;
+    includePatterns?: string[];
+    excludePatterns?: string[];
+    respectRobots: boolean;
+  };
+}) {
+  const {
+    jobId,
+    url,
+    finalUrl: finalUrlFromJob,
+    html,
+    contentType: _contentType,
+    depth,
+    maxDepth: _maxDepth,
+    maxPages: _maxPages,
+    includePatterns: _includePatterns,
+    excludePatterns: _excludePatterns,
+    respectRobots: _respectRobots,
+  } = job.data;
   const finalUrl = finalUrlFromJob ?? url;
   log.info({ jobId, url, depth }, 'Processing crawl parse');
 
@@ -205,7 +249,7 @@ async function processCrawlParse(job: { data: IngestJobData & { depth: number; m
         crawledAt: new Date(),
         metadata: {
           headings: parsed.headings,
-          anchorText: parsed.links.map(l => l.anchor).filter(Boolean),
+          anchorText: parsed.links.map((l) => l.anchor).filter(Boolean),
           author: parsed.meta.author,
           organization: parsed.meta.organization,
           ogType: parsed.meta.ogType,
@@ -266,7 +310,7 @@ async function processIndexIngest(job: { data: { documentId: string } }) {
 
     if (!doc) throw new Error('Document not found');
 
-    const chunks = doc.chunks.map(c => ({
+    const chunks = doc.chunks.map((c) => ({
       id: c.id,
       documentId: c.documentId,
       index: c.idx,
@@ -274,28 +318,30 @@ async function processIndexIngest(job: { data: { documentId: string } }) {
       heading: c.heading || undefined,
     }));
 
-    await indexManager.bulkIngest('web', [{
-      id: doc.id,
-      doc: {
+    await indexManager.bulkIngest('web', [
+      {
         id: doc.id,
-        url: doc.url,
-        canonicalUrl: doc.canonicalUrl,
-        title: doc.title,
-        content: chunks.map(c => c.text).join('\n\n'),
-        headings: (doc.metadata as Record<string, unknown>)?.headings as string[] || [],
-        anchorText: (doc.metadata as Record<string, unknown>)?.anchorText as string[] || [],
-        domain: doc.domain,
-        language: doc.language,
-        vertical: doc.vertical,
-        publishedAt: doc.publishedAt?.toISOString(),
-        crawledAt: doc.crawledAt.toISOString(),
-        contentHash: doc.contentHash,
-        simhash: doc.simhash || undefined,
-        status: doc.status,
-        metadata: doc.metadata,
-        wordCount: doc.wordCount,
-      }
-    }]);
+        doc: {
+          id: doc.id,
+          url: doc.url,
+          canonicalUrl: doc.canonicalUrl,
+          title: doc.title,
+          content: chunks.map((c) => c.text).join('\n\n'),
+          headings: ((doc.metadata as Record<string, unknown>)?.headings as string[]) || [],
+          anchorText: ((doc.metadata as Record<string, unknown>)?.anchorText as string[]) || [],
+          domain: doc.domain,
+          language: doc.language,
+          vertical: doc.vertical,
+          publishedAt: doc.publishedAt?.toISOString(),
+          crawledAt: doc.crawledAt.toISOString(),
+          contentHash: doc.contentHash,
+          simhash: doc.simhash || undefined,
+          status: doc.status,
+          metadata: doc.metadata,
+          wordCount: doc.wordCount,
+        },
+      },
+    ]);
 
     await prisma.document.update({
       where: { id: documentId },
@@ -327,9 +373,9 @@ async function processEmbedGenerate(job: { data: EmbedJobData }) {
         where: { id: chunkIds[i] },
         data: { embedded: true },
       });
-}
+    }
 
-// Update Elasticsearch with embeddings
+    // Update Elasticsearch with embeddings
     for (let i = 0; i < chunkIds.length; i++) {
       await (es as any).update({
         index: 'luma_web',
@@ -350,7 +396,18 @@ async function processAnswerGenerate(job: { data: AnswerJobData }) {
   log.info({ query, profile }, 'Processing answer generate');
 
   try {
-    const answer = await answerEngine.generateAnswer(query, { profile: profile as 'hybrid' | 'fastest' | 'recent' | 'primary-sources' | 'technical' | 'community' | 'documentation' | 'research' | 'exact' });
+    const answer = await answerEngine.generateAnswer(query, {
+      profile: profile as
+        | 'hybrid'
+        | 'fastest'
+        | 'recent'
+        | 'primary-sources'
+        | 'technical'
+        | 'community'
+        | 'documentation'
+        | 'research'
+        | 'exact',
+    });
     log.info({ query, took: answer.took }, 'Answer generated');
     return { success: true, answer };
   } catch (err) {
@@ -399,7 +456,7 @@ async function shutdown() {
 process.on('SIGTERM', shutdown);
 process.on('SIGINT', shutdown);
 
-startWorkers().catch(err => {
+startWorkers().catch((err) => {
   log.error({ err }, 'Failed to start workers');
   process.exit(1);
 });
