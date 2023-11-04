@@ -20,15 +20,15 @@ pnpm install && pnpm build && pnpm dev
 
 ### Service Ports (Local)
 
-| Service | Port | Internal |
-|---------|------|----------|
-| Web | 3000 | 3000 |
-| API | 4000 | 4000 |
-| Admin | 4001 | 4001 |
-| Elasticsearch | 9200 | 9200 |
-| Embeddings | 8000 | 8000 |
-| PostgreSQL | 5432 | 5432 |
-| Redis | 6379 | 6379 |
+| Service       | Port | Internal |
+| ------------- | ---- | -------- |
+| Web           | 3000 | 3000     |
+| API           | 4000 | 4000     |
+| Admin         | 4001 | 4001     |
+| Elasticsearch | 9200 | 9200     |
+| Embeddings    | 8000 | 8000     |
+| PostgreSQL    | 5432 | 5432     |
+| Redis         | 6379 | 6379     |
 
 ## Production Deployment
 
@@ -135,6 +135,7 @@ certbot --nginx -d search.example.com
 ## Kubernetes (Optional)
 
 See `infra/kubernetes/` for manifests:
+
 - Deployments for api, worker, web, embeddings
 - Services and Ingress
 - ConfigMaps for configuration
@@ -157,6 +158,7 @@ curl http://localhost:4000/metrics
 ## Backup & Restore
 
 ### Database
+
 ```bash
 # Backup
 docker compose exec postgres pg_dump -U luma luma_search > backup_$(date +%F).sql
@@ -166,6 +168,7 @@ cat backup_2024-01-15.sql | docker compose exec -T postgres psql -U luma luma_se
 ```
 
 ### Elasticsearch Snapshots
+
 ```bash
 # Register repository
 curl -X PUT "localhost:9200/_snapshot/luma_backup" -H 'Content-Type: application/json' -d'
@@ -218,20 +221,20 @@ docker compose -f infra/docker-compose.prod.yml exec api \
 
 ## Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| ES out of memory | Increase `ES_JAVA_OPTS=-Xms2g -Xmx2g` |
-| Queue stuck | Check worker logs, restart worker service |
-| DB connection refused | Verify `DATABASE_URL`, check Postgres health |
-| Crawler not indexing | Check robots.txt, SSRF logs, circuit breaker status |
-| AI answers fail | Verify `LLM_PROVIDER` and API keys |
+| Issue                 | Solution                                            |
+| --------------------- | --------------------------------------------------- |
+| ES out of memory      | Increase `ES_JAVA_OPTS=-Xms2g -Xmx2g`               |
+| Queue stuck           | Check worker logs, restart worker service           |
+| DB connection refused | Verify `DATABASE_URL`, check Postgres health        |
+| Crawler not indexing  | Check robots.txt, SSRF logs, circuit breaker status |
+| AI answers fail       | Verify `LLM_PROVIDER` and API keys                  |
 
 ## Scaling
 
-| Component | Scaling Strategy |
-|-----------|------------------|
-| API | Horizontal (stateless), add replicas behind LB |
-| Workers | Horizontal per queue type, increase concurrency |
-| Elasticsearch | Add data nodes, increase shards/replicas |
-| PostgreSQL | Read replicas, connection pooling (PgBouncer) |
-| Redis | Cluster mode for high throughput |
+| Component     | Scaling Strategy                                |
+| ------------- | ----------------------------------------------- |
+| API           | Horizontal (stateless), add replicas behind LB  |
+| Workers       | Horizontal per queue type, increase concurrency |
+| Elasticsearch | Add data nodes, increase shards/replicas        |
+| PostgreSQL    | Read replicas, connection pooling (PgBouncer)   |
+| Redis         | Cluster mode for high throughput                |
