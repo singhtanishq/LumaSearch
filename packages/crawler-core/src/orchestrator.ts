@@ -56,7 +56,8 @@ export class CrawlOrchestrator {
   matchesPatterns(url: string): boolean {
     const { includePatterns, excludePatterns } = this.opts;
     if (excludePatterns?.some((p) => new RegExp(p).test(url))) return false;
-    if (includePatterns?.length && !includePatterns.some((p) => new RegExp(p).test(url))) return false;
+    if (includePatterns?.length && !includePatterns.some((p) => new RegExp(p).test(url)))
+      return false;
     return true;
   }
 
