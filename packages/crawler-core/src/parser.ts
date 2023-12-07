@@ -28,9 +28,19 @@ export interface ParsedPage {
 }
 
 const BOILERPLATE_SELECTORS = [
-  'script', 'style', 'noscript', 'svg', 'iframe', 'form',
-  'nav', 'header', 'footer', 'aside',
-  '[role=navigation]', '[role=banner]', '[role=contentinfo]',
+  'script',
+  'style',
+  'noscript',
+  'svg',
+  'iframe',
+  'form',
+  'nav',
+  'header',
+  'footer',
+  'aside',
+  '[role=navigation]',
+  '[role=banner]',
+  '[role=contentinfo]',
 ];
 
 export function parseHtml(html: string, baseUrl: string): ParsedPage {
@@ -65,16 +75,18 @@ export function parseHtml(html: string, baseUrl: string): ParsedPage {
 
   // Links with anchor text
   const links: Array<{ url: string; anchor: string }> = [];
-  document.querySelectorAll('a[href]').forEach((a: { getAttribute: (n: string) => string | null; textContent: string | null }) => {
-    try {
-      const href = new URL(a.getAttribute('href') ?? '', baseUrl).toString();
-      if (href.startsWith('http')) {
-        links.push({ url: href, anchor: normalizeText(a.textContent ?? '').slice(0, 200) });
+  document
+    .querySelectorAll('a[href]')
+    .forEach((a: { getAttribute: (n: string) => string | null; textContent: string | null }) => {
+      try {
+        const href = new URL(a.getAttribute('href') ?? '', baseUrl).toString();
+        if (href.startsWith('http')) {
+          links.push({ url: href, anchor: normalizeText(a.textContent ?? '').slice(0, 200) });
+        }
+      } catch {
+        // skip malformed hrefs
       }
-    } catch {
-      // skip malformed hrefs
-    }
-  });
+    });
 
   // rel=canonical on the ORIGINAL document (pre-removal doesn't matter for head)
   const canonicalLink = document.querySelector('link[rel=canonical]')?.getAttribute('href');
@@ -86,15 +98,17 @@ export function parseHtml(html: string, baseUrl: string): ParsedPage {
     document.querySelector(`meta[property="${name}"]`)?.getAttribute('content') ?? undefined;
 
   const ldJson: Record<string, unknown>[] = [];
-  document.querySelectorAll('script[type="application/ld+json"]').forEach((s: { textContent: string | null }) => {
-    try {
-      const parsed = JSON.parse(s.textContent ?? 'null');
-      if (Array.isArray(parsed)) ldJson.push(...parsed);
-      else if (parsed) ldJson.push(parsed);
-    } catch {
-      // malformed JSON-LD ignored
-    }
-  });
+  document
+    .querySelectorAll('script[type="application/ld+json"]')
+    .forEach((s: { textContent: string | null }) => {
+      try {
+        const parsed = JSON.parse(s.textContent ?? 'null');
+        if (Array.isArray(parsed)) ldJson.push(...parsed);
+        else if (parsed) ldJson.push(parsed);
+      } catch {
+        // malformed JSON-LD ignored
+      }
+    });
 
   const findLd = (type: string): Record<string, unknown> | undefined =>
     ldJson.find((o) => String(o['@type'] ?? '').toLowerCase() === type.toLowerCase());
@@ -116,7 +130,9 @@ export function parseHtml(html: string, baseUrl: string): ParsedPage {
   const breadcrumb: string[] = [];
   if (breadcrumbList && Array.isArray(breadcrumbList['itemListElement'])) {
     for (const item of breadcrumbList['itemListElement'] as Array<Record<string, unknown>>) {
-      const name = (item['item'] as { name?: string })?.name ?? (typeof item['name'] === 'string' ? item['name'] : undefined);
+      const name =
+        (item['item'] as { name?: string })?.name ??
+        (typeof item['name'] === 'string' ? item['name'] : undefined);
       if (typeof name === 'string') breadcrumb.push(name);
     }
   }
@@ -148,7 +164,8 @@ export function parseHtml(html: string, baseUrl: string): ParsedPage {
     meta: {
       description: meta('description') ?? ogMeta('og:description'),
       author: meta('author') ?? (article?.['author'] as { name?: string } | undefined)?.name,
-      organization: ogMeta('og:site_name') ?? (article?.['publisher'] as { name?: string } | undefined)?.name,
+      organization:
+        ogMeta('og:site_name') ?? (article?.['publisher'] as { name?: string } | undefined)?.name,
       publishedAt,
       modifiedAt,
       canonical: canonicalLink ?? undefined,
