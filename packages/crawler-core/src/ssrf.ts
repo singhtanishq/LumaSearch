@@ -47,7 +47,13 @@ export function isPrivateIp(ip: string): boolean {
   // IPv6 loopback/link-local/ULA/mapped IPv4
   const lower = ip.toLowerCase();
   if (lower === '::1' || lower === '::') return true;
-  if (lower.startsWith('fe8') || lower.startsWith('fe9') || lower.startsWith('fea') || lower.startsWith('feb')) return true;
+  if (
+    lower.startsWith('fe8') ||
+    lower.startsWith('fe9') ||
+    lower.startsWith('fea') ||
+    lower.startsWith('feb')
+  )
+    return true;
   if (lower.startsWith('fc') || lower.startsWith('fd')) return true;
   if (lower.startsWith('::ffff:')) return isPrivateIp(lower.replace('::ffff:', ''));
   for (const [base, bits] of PRIVATE_RANGES) {
@@ -85,6 +91,9 @@ export async function resolveAndCheck(
     }
     return { allowed: true, ip: addrs[0]?.address };
   } catch (err) {
-    return { allowed: false, reason: `DNS lookup failed for ${hostname}: ${err instanceof Error ? err.message : String(err)}` };
+    return {
+      allowed: false,
+      reason: `DNS lookup failed for ${hostname}: ${err instanceof Error ? err.message : String(err)}`,
+    };
   }
 }
