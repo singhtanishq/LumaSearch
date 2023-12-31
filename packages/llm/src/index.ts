@@ -104,7 +104,10 @@ export class AnthropicChatProvider implements LLMProvider {
   }
 
   async generate(messages: PromptMessage[], options: GenerateOptions = {}): Promise<Generation> {
-    const system = messages.filter((m) => m.role === 'system').map((m) => m.content).join('\n\n');
+    const system = messages
+      .filter((m) => m.role === 'system')
+      .map((m) => m.content)
+      .join('\n\n');
     const rest = messages.filter((m) => m.role !== 'system');
     const res = await withBackoff(
       async () => {
