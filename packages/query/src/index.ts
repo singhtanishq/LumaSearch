@@ -2,17 +2,42 @@
  * Query understanding: parsing, operator extraction, normalization,
  * intent detection, spell-correction candidates.
  */
-import type { QueryInterpretation, QueryOperators, QueryIntent, SearchFilters } from '@luma-search/types';
+import type {
+  QueryInterpretation,
+  QueryOperators,
+  QueryIntent,
+  SearchFilters,
+} from '@luma-search/types';
 import { normalizeText } from '@luma-search/utils';
 
 // ─── Operator parsing ───────────────────────────────────────────────────────
 
-const OPERATOR_KEYS = ['site', 'filetype', 'intitle', 'inurl', 'before', 'after', 'lang', 'domain', 'language'] as const;
+const OPERATOR_KEYS = [
+  'site',
+  'filetype',
+  'intitle',
+  'inurl',
+  'before',
+  'after',
+  'lang',
+  'domain',
+  'language',
+] as const;
 type OperatorKey = (typeof OPERATOR_KEYS)[number];
 
 const DATE_WORDS: Record<string, string> = {
-  january: '01', february: '02', march: '03', april: '04', may: '05', june: '06',
-  july: '07', august: '08', september: '09', october: '10', november: '11', december: '12',
+  january: '01',
+  february: '02',
+  march: '03',
+  april: '04',
+  may: '05',
+  june: '06',
+  july: '07',
+  august: '08',
+  september: '09',
+  october: '10',
+  november: '11',
+  december: '12',
 };
 
 /**
@@ -37,7 +62,7 @@ export function parseOperators(rawQuery: string): { operators: QueryOperators; c
   // key:value operators (value may be quoted)
   const opRe = new RegExp(`-?(?:${OPERATOR_KEYS.join('|')}):(?:"([^"]+)"|(\\S+))`, 'gi');
   while ((m = opRe.exec(rawQuery)) !== null) {
-    const key = (m[0]!.split(':')[0]!.replace(/^-/, '').toLowerCase()) as OperatorKey;
+    const key = m[0]!.split(':')[0]!.replace(/^-/, '').toLowerCase() as OperatorKey;
     const value = (m[1] ?? m[2] ?? '').trim();
     if (!value) continue;
     switch (key) {
@@ -100,7 +125,10 @@ const INTENT_SIGNALS: Array<[QueryIntent, RegExp]> = [
   ['comparison', /\b(vs\.?|versus|compare|difference between|better than)\b/i],
   ['troubleshooting', /\b(error|fix|not working|fails|crash|debug|cannot|can't|broken)\b/i],
   ['news', /\b(news|latest|breaking|today|yesterday|this week)\b/i],
-  ['code', /\b(code|function|api|library|npm|pip|github|stack trace|compile|typescript|python|rust|golang)\b/i],
+  [
+    'code',
+    /\b(code|function|api|library|npm|pip|github|stack trace|compile|typescript|python|rust|golang)\b/i,
+  ],
   ['docs', /\b(documentation|docs|guide|reference|manual|tutorial|how to)\b/i],
   ['research', /\b(paper|study|research|arxiv|survey|benchmark|analysis)\b/i],
   ['transactional', /\b(buy|price|shop|order|download|subscribe|coupon|deal)\b/i],
@@ -178,7 +206,10 @@ export function interpretQuery(rawQuery: string): QueryInterpretation {
 /**
  * Derive structured search filters from operators (shared by API + search engine).
  */
-export function filtersFromOperators(operators: QueryOperators, explicit?: SearchFilters): SearchFilters {
+export function filtersFromOperators(
+  operators: QueryOperators,
+  explicit?: SearchFilters
+): SearchFilters {
   return {
     ...explicit,
     domains: operators.site ? [operators.site] : explicit?.domains,
