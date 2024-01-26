@@ -10,11 +10,15 @@ describe('URL utilities', () => {
 
     it('normalizes www', () => {
       // www is stripped when stripWww is true, but trailing slash remains
-      expect(canonicalizeUrl('https://www.example.com/', { stripWww: true })).toBe('https://example.com/');
+      expect(canonicalizeUrl('https://www.example.com/', { stripWww: true })).toBe(
+        'https://example.com/'
+      );
     });
 
     it('forces https', () => {
-      expect(canonicalizeUrl('http://example.com', { forceHttps: true })).toBe('https://example.com/');
+      expect(canonicalizeUrl('http://example.com', { forceHttps: true })).toBe(
+        'https://example.com/'
+      );
     });
 
     it('strips fragment', () => {
