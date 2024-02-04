@@ -5,7 +5,34 @@ RUN apk add --no-cache libc6-compat
 RUN corepack enable
 WORKDIR /workspace
 
-# Full copy (see .dockerignore); install then build all workspace packages.
+# Copy package files for workspace
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/api/package.json apps/api/
+COPY apps/worker/package.json apps/worker/
+COPY apps/web/package.json apps/web/
+COPY apps/admin/package.json apps/admin/
+
+# Copy all packages
+COPY packages/tsconfig/package.json packages/tsconfig/
+COPY packages/config/package.json packages/config/
+COPY packages/types/package.json packages/types/
+COPY packages/utils/package.json packages/utils/
+COPY packages/telemetry/package.json packages/telemetry/
+COPY packages/search-client/package.json packages/search-client/
+COPY packages/crawler-core/package.json packages/crawler-core/
+COPY packages/embeddings/package.json packages/embeddings/
+COPY packages/llm/package.json packages/llm/
+COPY packages/ranking/package.json packages/ranking/
+COPY packages/query/package.json packages/query/
+COPY packages/evidence/package.json packages/evidence/
+COPY packages/storage/package.json packages/storage/
+COPY packages/queue/package.json packages/queue/
+COPY packages/auth/package.json packages/auth/
+COPY packages/test-utils/package.json packages/test-utils/
+
+# Install dependencies
+RUN pnpm install --frozen-lockfile || pnpm install
+
+# Copy sources and build packages
 COPY . .
-RUN (pnpm install --frozen-lockfile || pnpm install) \
-    && pnpm --filter './packages/**' build
+RUN pnpm --filter './packages/**' build
