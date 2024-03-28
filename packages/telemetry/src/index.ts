@@ -54,6 +54,7 @@ export function newCorrelationId(): string {
 // ─── Metrics ────────────────────────────────────────────────────────────────
 
 let metricsInitialized = false;
+let cachedMetrics: Metrics | null = null;
 
 export interface Metrics {
   registry: typeof register;
@@ -71,11 +72,8 @@ export interface Metrics {
   queueJobs: Counter<string>;
 }
 
-export function initMetrics(): Metrics {
-  if (!metricsInitialized) {
-    collectDefaultMetrics({ register });
-    metricsInitialized = true;
-  }
+function createMetrics(): Metrics {
+  collectDefaultMetrics({ register });
 
   return {
     registry: register,
@@ -144,6 +142,13 @@ export function initMetrics(): Metrics {
       labelNames: ['queue', 'outcome'] as const,
     }),
   };
+}
+
+export function initMetrics(): Metrics {
+  if (!cachedMetrics) {
+    cachedMetrics = createMetrics();
+  }
+  return cachedMetrics;
 }
 
 // ─── Health checks ──────────────────────────────────────────────────────────
