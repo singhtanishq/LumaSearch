@@ -1,7 +1,7 @@
 # Shared base image with dependencies and packages built.
 # Build from repo root: docker build -f Dockerfile.base -t luma-base .
 FROM node:20-alpine AS base
-RUN apk add --no-cache libc6-compat openssl
+RUN apk add --no-cache libc6-compat openssl1.1-compat
 RUN corepack enable
 WORKDIR /workspace
 
