@@ -2,18 +2,18 @@ name: luma-search
 
 x-common-env: &common-env
   NODE_ENV: ${NODE_ENV:-development}
-  DATABASE_URL: postgresql://luma:luma@postgres:5432/luma_search?schema=public
-  REDIS_URL: redis://redis:6379/0
-  ELASTICSEARCH_URL: http://elasticsearch:9200
-  EMBEDDING_LOCAL_URL: http://embeddings:8000
-  OLLAMA_URL: http://ollama:11434
-  JWT_SECRET: dev-secret-change-in-production-min-32-chars-long
-  SESSION_SECRET: dev-session-secret-change-in-production-min-32-chars
-  CSRF_SECRET: dev-csrf-secret-change-in-production-min-32-chars
-  SESSION_COOKIE_SECURE: "false"
-  LLM_PROVIDER: disabled
-  ELASTICSEARCH_USERNAME: ""
-  ELASTICSEARCH_PASSWORD: ""
+  DATABASE_URL: ${DATABASE_URL:-postgresql://luma:luma@postgres:5432/luma_search?schema=public}
+  REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+  ELASTICSEARCH_URL: ${ELASTICSEARCH_URL:-http://elasticsearch:9200}
+  EMBEDDING_LOCAL_URL: ${EMBEDDING_LOCAL_URL:-http://embeddings:8000}
+  OLLAMA_URL: ${OLLAMA_URL:-http://ollama:11434}
+  JWT_SECRET: ${JWT_SECRET}
+  SESSION_SECRET: ${SESSION_SECRET}
+  CSRF_SECRET: ${CSRF_SECRET}
+  SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-false}
+  LLM_PROVIDER: ${LLM_PROVIDER:-disabled}
+  ELASTICSEARCH_USERNAME: ${ELASTICSEARCH_USERNAME:-}
+  ELASTICSEARCH_PASSWORD: ${ELASTICSEARCH_PASSWORD:-}
 
 services:
   # ─── Infrastructure ────────────────────────────────────────────────────────
