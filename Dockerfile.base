@@ -36,6 +36,9 @@ RUN pnpm install --frozen-lockfile || pnpm install
 # Generate Prisma client (use local prisma from storage package's node_modules)
 RUN ./packages/storage/node_modules/.bin/prisma generate --schema=./packages/storage/prisma/schema.prisma
 
+# Copy generated Prisma client to root node_modules for app images
+RUN mkdir -p /workspace/node_modules/.prisma && cp -r /workspace/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/.prisma/client /workspace/node_modules/.prisma/client
+
 # Copy sources and build packages
 COPY . .
 RUN pnpm --filter './packages/**' build
