@@ -1,5 +1,5 @@
 FROM luma-base AS api
 WORKDIR /workspace/apps/api
-RUN cp -r /workspace/.prisma-app .prisma
+RUN cp -r /workspace/.prisma-app /workspace/node_modules/.prisma
 EXPOSE 4000
 CMD ["pnpm", "start"]
