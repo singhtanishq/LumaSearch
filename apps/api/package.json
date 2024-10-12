@@ -26,6 +26,7 @@
     "@luma-search/telemetry": "workspace:*",
     "@luma-search/types": "workspace:*",
     "@luma-search/utils": "workspace:*",
+    "@prisma/client": "^5.22.0",
     "fastify": "^4.27.0",
     "pino": "^9.1.0"
   },
