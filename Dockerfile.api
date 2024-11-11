@@ -1,7 +1,8 @@
 FROM luma-base AS api
 WORKDIR /workspace/apps/api
-# Copy entire @prisma+client package and .prisma folder
-RUN cp -r /workspace/.prisma-app /workspace/node_modules/.prisma && \
-    cp -r /workspace/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0 /workspace/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0
+# Copy Prisma client from base image
+RUN mkdir -p /workspace/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0 && \
+    cp -r /workspace/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/.prisma /workspace/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/.prisma && \
+    cp -r /workspace/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma /workspace/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma
 EXPOSE 4000
 CMD ["pnpm", "start"]
