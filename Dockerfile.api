@@ -1,6 +1,9 @@
 FROM luma-base AS api
 WORKDIR /workspace/apps/api
-# Generate Prisma client in this image using local prisma
-RUN ./packages/storage/node_modules/.bin/prisma generate --schema=../../packages/storage/prisma/schema.prisma
+# Copy .prisma folder from base image (generated during base build)
+COPY --from=luma-base /workspace/.prisma-app /workspace/node_modules/.prisma
+# Also copy the @prisma/client package
+RUN mkdir -p /workspace/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0 && \
+    cp -r /workspace/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0 /workspace/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0
 EXPOSE 4000
 CMD ["pnpm", "start"]
