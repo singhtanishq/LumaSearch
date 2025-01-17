@@ -1,7 +1,9 @@
 FROM luma-base AS api
 WORKDIR /workspace/apps/api
-# Copy Prisma client from base image
+# Copy entire @prisma+client package with all its contents
 COPY --from=luma-base /workspace/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0 /workspace/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0
 COPY --from=luma-base /workspace/.prisma-app /workspace/node_modules/.prisma
+# Also ensure the symlink is created
+RUN ln -sf /workspace/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/.prisma/client /workspace/node_modules/.prisma/client
 EXPOSE 4000
 CMD ["pnpm", "start"]
