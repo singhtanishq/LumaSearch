@@ -1,4 +1,4 @@
 FROM luma-base AS worker
 WORKDIR /workspace/apps/worker
-RUN /workspace/packages/storage/node_modules/.bin/prisma generate --schema=/workspace/packages/storage/prisma/schema.prisma
+COPY --from=luma-base /workspace/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0 /workspace/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0
 CMD ["pnpm", "start"]
