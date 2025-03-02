@@ -1,7 +1,4 @@
 FROM luma-base AS worker
 WORKDIR /workspace/apps/worker
-COPY --from=luma-base /workspace/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0 /workspace/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0
-COPY --from=luma-base /workspace/.prisma-app /workspace/node_modules/.prisma
-RUN mkdir -p /workspace/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/.prisma && \
-    cp -r /workspace/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/.prisma/client /workspace/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/.prisma/client
+RUN /workspace/packages/storage/node_modules/.bin/prisma generate --schema=/workspace/packages/storage/prisma/schema.prisma
 CMD ["pnpm", "start"]
