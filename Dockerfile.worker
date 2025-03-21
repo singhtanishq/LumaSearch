@@ -1,6 +1,5 @@
 FROM luma-base AS worker
-WORKDIR /workspace/apps/worker
-# Generate Prisma client locally in this image
+WORKDIR /workspace
 RUN /workspace/packages/storage/node_modules/.bin/prisma generate --schema=/workspace/packages/storage/prisma/schema.prisma
-EXPOSE 4000
+WORKDIR /workspace/apps/worker
 CMD ["pnpm", "start"]
