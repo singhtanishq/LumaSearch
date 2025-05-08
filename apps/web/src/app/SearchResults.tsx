@@ -120,9 +120,14 @@ function ResultCard({
               </>
             )}
           </div>
-          <p className="text-gray-700 dark:text-gray-300 line-clamp-3 mb-2">
-            {result.highlights?.flatMap((h) => h.fragments).join(' … ') || result.snippet}
-          </p>
+          <p
+            className="text-gray-700 dark:text-gray-300 line-clamp-3 mb-2 [&>mark]:bg-yellow-200 [&>mark]:dark:bg-yellow-800/50 [&>mark]:rounded-sm [&>mark]:px-0.5"
+            dangerouslySetInnerHTML={{
+              __html: (
+                result.highlights?.flatMap((h) => h.fragments).join(' … ') || result.snippet
+              ).replace(/<(?!\/?mark\b)[^>]*>/gi, ''),
+            }}
+          />
           {isExpanded && (
             <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-800 text-sm space-y-1">
               <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
