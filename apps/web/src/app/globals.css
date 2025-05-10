@@ -27,7 +27,7 @@
 
 @layer utilities {
   .markdown-content {
-    @apply prose prose-gray dark:prose-invert max-w-none;
+    @apply max-w-none text-base leading-relaxed;
   }
   .markdown-content code {
     @apply bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-sm font-mono;
