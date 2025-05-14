@@ -1,3 +1,5 @@
+import './globals.css';
+
 export const metadata = {
   title: 'LumaSearch',
   description: 'A production-grade, self-hostable search engine',
