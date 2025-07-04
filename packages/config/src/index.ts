@@ -15,7 +15,7 @@ export const appEnvSchema = z.object({
  * Database environment schema
  */
 export const databaseEnvSchema = z.object({
-  DATABASE_URL: z.string().url(),
+  DATABASE_URL: z.string().default('file:./data/luma.db'),
   DB_POOL_MIN: z.coerce.number().int().min(1).default(2),
   DB_POOL_MAX: z.coerce.number().int().min(1).default(10),
   DB_CONNECT_TIMEOUT: z.coerce.number().int().min(1000).default(10000),
@@ -50,17 +50,17 @@ export const elasticsearchEnvSchema = z.object({
  * Authentication environment schema
  */
 export const authEnvSchema = z.object({
-  JWT_SECRET: z.string().min(32),
+  JWT_SECRET: z.string().min(32).optional(),
   JWT_EXPIRES_IN: z.string().default('15m'),
   JWT_REFRESH_EXPIRES_IN: z.string().default('7d'),
   API_KEY_PREFIX: z.string().default('luma_'),
   API_KEY_HASH_ROUNDS: z.coerce.number().int().min(10).default(12),
   BCRYPT_ROUNDS: z.coerce.number().int().min(10).default(12),
-  SESSION_SECRET: z.string().min(32),
+  SESSION_SECRET: z.string().min(32).optional(),
   SESSION_COOKIE_NAME: z.string().default('luma_session'),
   SESSION_COOKIE_SECURE: z.coerce.boolean().default(false),
   SESSION_COOKIE_SAME_SITE: z.enum(['strict', 'lax', 'none']).default('lax'),
-  CSRF_SECRET: z.string().min(32),
+  CSRF_SECRET: z.string().min(32).optional(),
 });
 
 /**
