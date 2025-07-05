@@ -22,9 +22,8 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@luma-search/types": "workspace:*",
-    "bullmq": "^5.7.0",
-    "ioredis": "^5.4.1"
+    "@luma-search/telemetry": "workspace:*",
+    "@prisma/client": "^5.22.0"
   },
   "devDependencies": {
     "@luma-search/tsconfig": "workspace:*",
