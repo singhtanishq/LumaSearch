@@ -1,13 +1,13 @@
-// LumaSearch relational schema — metadata, crawl state, users, workspaces.
-// Full-text document content lives in Elasticsearch; Postgres holds state.
+// LumaSearch relational schema (SQLite) — metadata, crawl state, users, workspaces.
+// SQLite keeps the project fully self-contained: no external database service needed.
+// Full-text search lives in FTS5 virtual tables (see packages/search-engine).
 
 generator client {
   provider = "prisma-client-js"
-  binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -52,7 +52,7 @@ model Membership {
   id             String   @id @default(cuid())
   userId         String
   organizationId String
-  role           Role     @default(readonly)
+  role           String   @default("readonly") // owner|admin|operator|analyst|readonly
   createdAt      DateTime @default(now())
 
   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -62,14 +62,6 @@ model Membership {
   @@index([organizationId])
 }
 
-enum Role {
-  owner
-  admin
-  operator
-  analyst
-  readonly
-}
-
 model ApiKey {
   id             String    @id @default(cuid())
   name           String
@@ -77,14 +69,14 @@ model ApiKey {
   prefix         String
   userId         String
   organizationId String
-  scopes         String[]  @default(["search:read"])
+  scopes         String    @default("[\"search:read\"]") // JSON array
   lastUsedAt     DateTime?
   revokedAt      DateTime?
   expiresAt      DateTime?
   createdAt      DateTime  @default(now())
 
-  user         User         @relation(fields: [userId], references: [id])
-  organization Organization @relation(fields: [organizationId], references: [id])
+  user         User           @relation(fields: [userId], references: [id])
+  organization Organization   @relation(fields: [organizationId], references: [id])
   usage        UsageRecord[]
 
   @@index([organizationId])
@@ -93,46 +85,32 @@ model ApiKey {
 // ─── Documents & crawl state ────────────────────────────────────────────────
 
 model Document {
-  id           String        @id @default(cuid())
-  url          String        @unique
+  id           String   @id @default(cuid())
+  url          String   @unique
   canonicalUrl String?
   title        String
   domain       String
   language     String?
-  vertical     Vertical      @default(web)
-  status       ContentStatus @default(pending)
+  vertical     String   @default("web") // web|code|docs
+  status       String   @default("pending") // pending|indexed|failed|excluded|duplicate
   contentHash  String
   simhash      String?
   wordCount    Int?
   publishedAt  DateTime?
   modifiedAt   DateTime?
-  crawledAt    DateTime      @default(now())
+  crawledAt    DateTime @default(now())
   indexedAt    DateTime?
   error        String?
-  metadata     Json?
+  metadata     String? // JSON
 
-  chunks       DocumentChunk[]
-  versions     DocumentVersion[]
-  crawlTasks   CrawlTask[]
+  chunks     DocumentChunk[]
+  versions   DocumentVersion[]
+  crawlTasks CrawlTask[]
 
   @@index([domain])
   @@index([status])
   @@index([contentHash])
   @@index([vertical, status])
-}
-
-enum Vertical {
-  web
-  code
-  docs
-}
-
-enum ContentStatus {
-  pending
-  indexed
-  failed
-  excluded
-  duplicate
 }
 
 model DocumentChunk {
@@ -164,54 +142,45 @@ model DocumentVersion {
 }
 
 model CrawlJob {
-  id             String         @id @default(cuid())
-  name           String?
-  seeds          String[]
-  status         CrawlJobStatus @default(pending)
-  maxPages       Int            @default(1000)
-  maxDepth       Int            @default(3)
-  includePatterns String[]
-  excludePatterns String[]
-  respectRobots  Boolean        @default(true)
-  createdAt      DateTime       @default(now())
-  startedAt      DateTime?
-  finishedAt     DateTime?
-  pausedAt       DateTime?
-  checkpoint     Json?
+  id              String    @id @default(cuid())
+  name            String?
+  seeds           String // JSON array of seed URLs
+  status          String    @default("pending") // pending|running|paused|completed|failed|cancelled
+  maxPages        Int       @default(1000)
+  maxDepth        Int       @default(3)
+  includePatterns String    @default("[]") // JSON array
+  excludePatterns String    @default("[]") // JSON array
+  respectRobots   Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  startedAt       DateTime?
+  finishedAt      DateTime?
+  pausedAt        DateTime?
+  checkpoint      String? // JSON
 
   tasks CrawlTask[]
 
   @@index([status])
 }
 
-enum CrawlJobStatus {
-  pending
-  running
-  paused
-  completed
-  failed
-  cancelled
-}
-
 model CrawlTask {
-  id           String        @id @default(cuid())
-  jobId        String
-  documentId   String?       @unique
-  url          String
-  finalUrl     String?
-  depth        Int           @default(0)
-  status       CrawlTaskStatus @default(pending)
-  attempts     Int           @default(0)
-  statusCode   Int?
-  contentType  String?
+  id            String    @id @default(cuid())
+  jobId         String
+  documentId    String?   @unique
+  url           String
+  finalUrl      String?
+  depth         Int       @default(0)
+  status        String    @default("pending") // pending|fetching|parsing|done|failed|skipped
+  attempts      Int       @default(0)
+  statusCode    Int?
+  contentType   String?
   contentLength Int?
-  latencyMs    Int?
-  etag         String?
-  lastModified String?
-  redirectChain String[]
-  error        String?
-  createdAt    DateTime      @default(now())
-  completedAt  DateTime?
+  latencyMs     Int?
+  etag          String?
+  lastModified  String?
+  redirectChain String    @default("[]") // JSON array
+  error         String?
+  createdAt     DateTime  @default(now())
+  completedAt   DateTime?
 
   job      CrawlJob  @relation(fields: [jobId], references: [id], onDelete: Cascade)
   document Document? @relation(fields: [documentId], references: [id])
@@ -221,21 +190,12 @@ model CrawlTask {
   @@index([jobId, status])
 }
 
-enum CrawlTaskStatus {
-  pending
-  fetching
-  parsing
-  done
-  failed
-  skipped
-}
-
 // ─── Search sessions, queries, workspaces ──────────────────────────────────
 
 model SearchQuery {
   id          String   @id @default(cuid())
   userId      String?
-  sessionKey  String?  // pseudonymous session id, never a raw PII string
+  sessionKey  String? // pseudonymous session id, never a raw PII string
   raw         String
   normalized  String
   intent      String?
@@ -252,9 +212,9 @@ model SearchQuery {
 }
 
 model SearchSession {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   userId    String
-  startedAt DateTime @default(now())
+  startedAt DateTime  @default(now())
   endedAt   DateTime?
 
   user User @relation(fields: [userId], references: [id])
@@ -274,8 +234,8 @@ model SearchWorkspace {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
-  owner        User          @relation(fields: [ownerId], references: [id])
-  organization Organization? @relation(fields: [organizationId], references: [id])
+  owner        User            @relation(fields: [ownerId], references: [id])
+  organization Organization?   @relation(fields: [organizationId], references: [id])
   pinned       PinnedResult[]
   notes        WorkspaceNote[]
 
@@ -299,7 +259,7 @@ model WorkspaceNote {
   id          String   @id @default(cuid())
   workspaceId String
   content     String
-  citations   Json?
+  citations   String? // JSON
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -312,7 +272,7 @@ model WorkspaceNote {
 
 model IndexAlias {
   id          String   @id @default(cuid())
-  vertical    Vertical
+  vertical    String
   alias       String   @unique
   activeIndex String
   createdAt   DateTime @default(now())
@@ -325,10 +285,30 @@ model IndexSnapshot {
   snapshotName String
   repository   String
   docCount     Int
-  sizeBytes    BigInt
+  sizeBytes    Int
   createdAt    DateTime @default(now())
 
   @@index([indexName])
+}
+
+// ─── Job queue (SQLite-backed, replaces Redis/BullMQ) ──────────────────────
+
+model Job {
+  id          String    @id @default(cuid())
+  queue       String
+  payload     String // JSON
+  status      String    @default("waiting") // waiting|active|completed|failed|delayed
+  attempts    Int       @default(0)
+  maxAttempts Int       @default(3)
+  priority    Int       @default(0)
+  runAt       DateTime  @default(now())
+  startedAt   DateTime?
+  finishedAt  DateTime?
+  lastError   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([queue, status, runAt, priority])
 }
 
 // ─── Usage, audit, billing ─────────────────────────────────────────────────
@@ -337,7 +317,7 @@ model UsageRecord {
   id             String   @id @default(cuid())
   organizationId String
   apiKeyId       String?
-  kind           UsageKind
+  kind           String // search|crawl_url|indexed_doc|ai_token|storage_byte
   quantity       Int
   occurredAt     DateTime @default(now())
 
@@ -347,21 +327,13 @@ model UsageRecord {
   @@index([organizationId, occurredAt])
 }
 
-enum UsageKind {
-  search
-  crawl_url
-  indexed_doc
-  ai_token
-  storage_byte
-}
-
 model AuditLog {
   id             String   @id @default(cuid())
   organizationId String?
   userId         String?
   action         String
   target         String?
-  detail         Json?
+  detail         String? // JSON
   ip             String?
   createdAt      DateTime @default(now())
 
@@ -387,13 +359,13 @@ model BillingAccount {
 // ─── Connectors, collections, alerts ───────────────────────────────────────
 
 model Connector {
-  id          String   @id @default(cuid())
-  kind        String // github, s3, webdav, rss...
-  name        String
-  config      Json
-  enabled     Boolean  @default(true)
-  lastSyncAt  DateTime?
-  createdAt   DateTime @default(now())
+  id         String    @id @default(cuid())
+  kind       String // github, s3, webdav, rss...
+  name       String
+  config     String // JSON
+  enabled    Boolean   @default(true)
+  lastSyncAt DateTime?
+  createdAt  DateTime  @default(now())
 
   collections Collection[]
 }
@@ -410,10 +382,10 @@ model Collection {
 }
 
 model Alert {
-  id         String     @id @default(cuid())
+  id         String    @id @default(cuid())
   kind       String
-  severity   String     @default("info")
+  severity   String    @default("info")
   message    String
   resolvedAt DateTime?
-  createdAt  DateTime   @default(now())
+  createdAt  DateTime  @default(now())
 }
