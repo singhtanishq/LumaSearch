@@ -1,0 +1,160 @@
+{
+  "results": [
+    {
+      "route": "/",
+      "scenario": "Homepage load - desktop",
+      "viewport": "desktop",
+      "status": "PASS",
+      "detail": "title=\"LumaSearch\""
+    },
+    {
+      "route": "/",
+      "scenario": "Homepage load - laptop",
+      "viewport": "laptop",
+      "status": "PASS",
+      "detail": "title=\"LumaSearch\""
+    },
+    {
+      "route": "/",
+      "scenario": "Homepage load - tablet",
+      "viewport": "tablet",
+      "status": "PASS",
+      "detail": "title=\"LumaSearch\""
+    },
+    {
+      "route": "/",
+      "scenario": "Homepage load - mobile",
+      "viewport": "mobile",
+      "status": "PASS",
+      "detail": "title=\"LumaSearch\""
+    },
+    {
+      "route": "/",
+      "scenario": "Search input exists",
+      "viewport": "desktop",
+      "status": "PASS",
+      "detail": "count=1"
+    },
+    {
+      "route": "/",
+      "scenario": "Empty query submission",
+      "viewport": "desktop",
+      "status": "PASS",
+      "detail": "no crash"
+    },
+    {
+      "route": "/",
+      "scenario": "Search \"typescript\"",
+      "viewport": "desktop",
+      "status": "PASS",
+      "detail": "results shown"
+    },
+    {
+      "route": "/",
+      "scenario": "Search \"site:wikipedia.org\"",
+      "viewport": "desktop",
+      "status": "PASS",
+      "detail": "domain filter works"
+    },
+    {
+      "route": "/",
+      "scenario": "Search with exclusion",
+      "viewport": "desktop",
+      "status": "PASS",
+      "detail": "executed"
+    },
+    {
+      "route": "/",
+      "scenario": "Profile switch to fastest",
+      "viewport": "desktop",
+      "status": "PASS",
+      "detail": "executed"
+    },
+    {
+      "route": "/",
+      "scenario": "Answer button initial state",
+      "viewport": "desktop",
+      "status": "WARN",
+      "detail": "enabled"
+    },
+    {
+      "route": "/",
+      "scenario": "Result cards render",
+      "viewport": "desktop",
+      "status": "PASS",
+      "detail": "1 cards"
+    },
+    {
+      "route": "/",
+      "scenario": "Load more button",
+      "viewport": "desktop",
+      "status": "INFO",
+      "detail": "0 found"
+    },
+    {
+      "route": "/",
+      "scenario": "Result expand/collapse",
+      "viewport": "desktop",
+      "status": "PASS",
+      "detail": "toggled"
+    },
+    {
+      "route": "/",
+      "scenario": "Keyboard \"/\" focuses search",
+      "viewport": "desktop",
+      "status": "PASS",
+      "detail": "focused=INPUT"
+    },
+    {
+      "route": "API /search",
+      "scenario": "Direct API search",
+      "viewport": "N/A",
+      "status": "PASS",
+      "detail": "1 results, took=17ms"
+    },
+    {
+      "route": "API /health",
+      "scenario": "Health check",
+      "viewport": "N/A",
+      "status": "PASS",
+      "detail": "{\"search-engine\":{\"status\":\"ok\",\"detail\":\"8 documents indexed\"},\"memory\":{\"status\":\"ok\",\"detail\":\"38MB\"},\"database\":{\"status\":\"ok\",\"latencyMs\":6}}"
+    },
+    {
+      "route": "API /index/status",
+      "scenario": "Index status",
+      "viewport": "N/A",
+      "status": "PASS",
+      "detail": "8 docs"
+    },
+    {
+      "route": "/results",
+      "scenario": "Results page - laptop",
+      "viewport": "laptop",
+      "status": "PASS",
+      "detail": "screenshot captured"
+    },
+    {
+      "route": "/results",
+      "scenario": "Results page - tablet",
+      "viewport": "tablet",
+      "status": "PASS",
+      "detail": "screenshot captured"
+    },
+    {
+      "route": "/results",
+      "scenario": "Results page - mobile",
+      "viewport": "mobile",
+      "status": "PASS",
+      "detail": "screenshot captured"
+    },
+    {
+      "route": "/",
+      "scenario": "No results state",
+      "viewport": "desktop",
+      "status": "PASS",
+      "detail": "page renders"
+    }
+  ],
+  "issues": [],
+  "consoleErrors": []
+}
