@@ -119,7 +119,7 @@ model ApiKey {
   prefix      String
   hashedKey   String
   scopes      Json
-  rateLimit   Int?      @default(null)
+  rateLimit   Int?      @default( null )
   expiresAt   DateTime?
   lastUsedAt  DateTime?
   createdAt   DateTime  @default(now())
@@ -174,7 +174,7 @@ model Alert {
   name        String
   type        String    // query, topic, page, domain
   config      Json
-  isActive    Boolean    @default(true)
+  isActive    Boolean   @default(true)
   lastTriggeredAt DateTime?
   
   @@map("alerts")
