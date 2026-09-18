@@ -58,10 +58,6 @@ export function createQueue(name: QueueName, cfg: QueueConfig): Queue {
   return new Queue(name, {
     ...connectionOptions(cfg.redisUrl),
     defaultJobOptions: defaultJobOptions(cfg),
-    limiter: {
-      max: cfg.rateLimitMax ?? 100,
-      duration: cfg.rateLimitWindowMs ?? 60_000,
-    },
   });
 }
 
@@ -74,6 +70,10 @@ export function createWorker<T>(
   return new Worker<T>(name, processor, {
     ...connectionOptions(cfg.redisUrl),
     concurrency,
+    limiter: {
+      max: cfg.rateLimitMax ?? 100,
+      duration: cfg.rateLimitWindowMs ?? 60_000,
+    },
   });
 }
 
