@@ -45,12 +45,12 @@ export function parseHtml(html: string, baseUrl: string): ParsedPage {
 
   // Remove boilerplate from the working copy
   for (const sel of BOILERPLATE_SELECTORS) {
-    document.querySelectorAll(sel).forEach((el) => el.remove());
+    document.querySelectorAll(sel).forEach((el: { remove: () => void }) => el.remove());
   }
 
   // Headings
   const headings: string[] = [];
-  document.querySelectorAll('h1, h2, h3').forEach((h) => {
+  document.querySelectorAll('h1, h2, h3').forEach((h: { textContent: string | null }) => {
     const t = normalizeText(h.textContent ?? '');
     if (t) headings.push(t);
   });
@@ -65,7 +65,7 @@ export function parseHtml(html: string, baseUrl: string): ParsedPage {
 
   // Links with anchor text
   const links: Array<{ url: string; anchor: string }> = [];
-  document.querySelectorAll('a[href]').forEach((a) => {
+  document.querySelectorAll('a[href]').forEach((a: { getAttribute: (n: string) => string | null; textContent: string | null }) => {
     try {
       const href = new URL(a.getAttribute('href') ?? '', baseUrl).toString();
       if (href.startsWith('http')) {
@@ -86,7 +86,7 @@ export function parseHtml(html: string, baseUrl: string): ParsedPage {
     document.querySelector(`meta[property="${name}"]`)?.getAttribute('content') ?? undefined;
 
   const ldJson: Record<string, unknown>[] = [];
-  document.querySelectorAll('script[type="application/ld+json"]').forEach((s) => {
+  document.querySelectorAll('script[type="application/ld+json"]').forEach((s: { textContent: string | null }) => {
     try {
       const parsed = JSON.parse(s.textContent ?? 'null');
       if (Array.isArray(parsed)) ldJson.push(...parsed);
