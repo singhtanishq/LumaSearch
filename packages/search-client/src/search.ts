@@ -137,7 +137,7 @@ export function buildLexicalQuery(
     for (const term of operators.exclusions) {
       mustNot.push({ multi_match: { query: term, fields: ['title', 'content', 'headings'] } });
     }
-    query.bool.must_not = mustNot;
+    (query.bool as { must_not?: unknown }).must_not = mustNot;
   }
   return query;
 }
