@@ -3,14 +3,10 @@ RUN apk add --no-cache libc6-compat
 RUN corepack enable
 WORKDIR /workspace
 
-COPY pnpm-workspace.yaml package.json pnpm-lock.yaml* ./
-COPY packages/tsconfig/package.json packages/tsconfig/
-COPY packages/types/package.json packages/types/
-COPY apps/web/package.json apps/web/
-RUN pnpm install --frozen-lockfile || pnpm install
-
 COPY . .
-RUN pnpm --filter @luma-search/types build && pnpm --filter @luma-search/web build
+RUN (pnpm install --frozen-lockfile || pnpm install) \
+    && pnpm --filter './packages/**' build \
+    && if [ -f apps/web/package.json ]; then pnpm --filter @luma-search/web build; fi
 
 WORKDIR /workspace/apps/web
 EXPOSE 3000
