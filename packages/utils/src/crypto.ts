@@ -56,14 +56,17 @@ export function simhash(text: string): string {
   for (const shingle of shingles) {
     const h = fnv1a(shingle);
     for (let b = 0; b < 64; b++) {
-      if ((h >> BigInt(b)) & 1n) bits[b] += 1;
-      else bits[b] -= 1;
+      if ((h >> BigInt(b)) & 1n) {
+        bits[b] = (bits[b] ?? 0) + 1;
+      } else {
+        bits[b] = (bits[b] ?? 0) - 1;
+      }
     }
   }
 
   let out = 0n;
   for (let b = 0; b < 64; b++) {
-    if (bits[b] > 0) out |= 1n << BigInt(b);
+    if ((bits[b] ?? 0) > 0) out |= 1n << BigInt(b);
   }
   return out.toString(16).padStart(16, '0');
 }
@@ -72,7 +75,10 @@ export function hammingDistance(a: string, b: string): number {
   if (a.length !== b.length) return 64;
   let dist = 0;
   for (let i = 0; i < a.length; i++) {
-    let x = parseInt(a[i], 16) ^ parseInt(b[i], 16);
+    const ca = a[i];
+    const cb = b[i];
+    if (ca === undefined || cb === undefined) return 64;
+    let x = parseInt(ca, 16) ^ parseInt(cb, 16);
     while (x) {
       dist += x & 1;
       x >>= 1;
