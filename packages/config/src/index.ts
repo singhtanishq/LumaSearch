@@ -314,7 +314,7 @@ export function validateEnv(config: Record<string, string | undefined> = process
     const message = [
       'Environment validation failed:',
       ...Object.entries(errors.fieldErrors).flatMap(([field, messages]) =>
-        messages.map((msg) => `  ${field}: ${msg}`)
+        (messages ?? []).map((msg) => `  ${field}: ${msg}`)
       ),
       ...errors.formErrors.map((msg) => `  ${msg}`),
     ].join('\n');
@@ -336,7 +336,7 @@ export function validateEnvPartial<T extends z.ZodRawShape>(
     const message = [
       'Environment validation failed:',
       ...Object.entries(errors.fieldErrors).flatMap(([field, messages]) =>
-        messages.map((msg) => `  ${field}: ${msg}`)
+        (messages ?? []).map((msg) => `  ${field}: ${msg}`)
       ),
       ...errors.formErrors.map((msg) => `  ${msg}`),
     ].join('\n');
