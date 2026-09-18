@@ -107,8 +107,6 @@ model Membership {
   user        User      @relation(fields: [userId], references: [id])
   userId    String
   
-  organization String
-  
   @@unique([userId])
   @@map("memberships")
 }
@@ -119,7 +117,7 @@ model ApiKey {
   prefix      String
   hashedKey   String
   scopes      Json
-  rateLimit   Int?      @default( null )
+  rateLimit   Int?      
   expiresAt   DateTime?
   lastUsedAt  DateTime?
   createdAt   DateTime  @default(now())
@@ -164,7 +162,6 @@ model Collection {
   description String?
   isPrivate   Boolean   @default(true)
   indexAlias  String
-  connectorId String?
   
   @@map("collections")
 }
