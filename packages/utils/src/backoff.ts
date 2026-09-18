@@ -48,9 +48,7 @@ export class CircuitBreaker {
   private readonly threshold: number;
   private readonly cooldownMs: number;
 
-  constructor(
-    private readonly opts: { threshold?: number; cooldownMs?: number } = {}
-  ) {
+  constructor(opts: { threshold?: number; cooldownMs?: number } = {}) {
     this.threshold = opts.threshold ?? 5;
     this.cooldownMs = opts.cooldownMs ?? 60_000;
   }
