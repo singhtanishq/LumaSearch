@@ -1,0 +1,17 @@
+node_modules/
+dist/
+build/
+.turbo/
+.next/
+coverage/
+*.log
+.env
+.env.local
+.env.*.local
+.DS_Store
+*.d.ts
+pnpm-lock.yaml
+.turbo
+*.config.ts
+*.config.js
+*.tsbuildinfo
