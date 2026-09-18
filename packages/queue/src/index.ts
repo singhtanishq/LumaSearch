@@ -2,7 +2,7 @@
  * BullMQ queue definitions and shared connection factory.
  * Queue-per-concern: crawl fetch/parse, ingest, embed, answer, analytics.
  */
-import { Queue, QueueEvents, Worker, ConnectionOptions, Processor } from 'bullmq';
+import { Queue, QueueEvents, Worker, Processor } from 'bullmq';
 import IORedis, { Redis } from 'ioredis';
 
 export const QUEUE_NAMES = {
@@ -32,7 +32,12 @@ export function createConnection(redisUrl: string): Redis {
   return conn;
 }
 
-export function connectionOptions(redisUrl: string): ConnectionOptions {
+export interface QueueConnection {
+  connection: Redis;
+  prefix: string;
+}
+
+export function connectionOptions(redisUrl: string): QueueConnection {
   return {
     connection: createConnection(redisUrl),
     prefix: 'luma',
