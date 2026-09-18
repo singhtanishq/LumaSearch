@@ -81,7 +81,7 @@ export class IndexManager {
     const alias = this.aliasName(vertical);
     const body = documents.flatMap(({ id, doc }) => [{ index: { _index: alias, _id: id } }, doc]);
     const res = await this.client.bulk({ operations: body, refresh: options.refresh ?? false });
-    const items = (res.body?.items ?? []) as Array<{
+    const items = (res.items ?? []) as Array<{
       index?: { error?: unknown; status?: number };
     }>;
     const errors: string[] = [];
@@ -104,7 +104,7 @@ export class IndexManager {
       index: this.aliasName(vertical),
       ...(query ? { query } : {}),
     });
-    return (res.body?.count as number) ?? 0;
+    return res.count ?? 0;
   }
 
   /**
