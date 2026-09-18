@@ -11,3 +11,4 @@ export {
 } from './mappings';
 export type { MappingOptions } from './mappings';
 export * from './search';
+export type { Client as SearchClient } from '@elastic/elasticsearch';
