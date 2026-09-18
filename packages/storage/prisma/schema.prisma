@@ -1,0 +1,417 @@
+// LumaSearch relational schema — metadata, crawl state, users, workspaces.
+// Full-text document content lives in Elasticsearch; Postgres holds state.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Users & Organizations ──────────────────────────────────────────────────
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  memberships Membership[]
+  apiKeys     ApiKey[]
+  workspaces  SearchWorkspace[]
+  usage       UsageRecord[]
+  auditLogs   AuditLog[]
+  billing     BillingAccount?
+}
+
+model User {
+  id             String    @id @default(cuid())
+  email          String    @unique
+  name           String?
+  passwordHash   String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  lastSeenAt     DateTime?
+  historyEnabled Boolean   @default(true) // privacy control for search history
+
+  sessions    SearchSession[]
+  queries     SearchQuery[]
+  memberships Membership[]
+  apiKeys     ApiKey[]
+  auditLogs   AuditLog[]
+  workspaces  SearchWorkspace[]
+
+  @@index([email])
+}
+
+model Membership {
+  id             String   @id @default(cuid())
+  userId         String
+  organizationId String
+  role           Role     @default(readonly)
+  createdAt      DateTime @default(now())
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+  @@index([organizationId])
+}
+
+enum Role {
+  owner
+  admin
+  operator
+  analyst
+  readonly
+}
+
+model ApiKey {
+  id             String    @id @default(cuid())
+  name           String
+  hashedKey      String    @unique
+  prefix         String
+  userId         String
+  organizationId String
+  scopes         String[]  @default(["search:read"])
+  lastUsedAt     DateTime?
+  revokedAt      DateTime?
+  expiresAt      DateTime?
+  createdAt      DateTime  @default(now())
+
+  user         User         @relation(fields: [userId], references: [id])
+  organization Organization @relation(fields: [organizationId], references: [id])
+  usage        UsageRecord[]
+
+  @@index([organizationId])
+}
+
+// ─── Documents & crawl state ────────────────────────────────────────────────
+
+model Document {
+  id           String        @id @default(cuid())
+  url          String        @unique
+  canonicalUrl String?
+  title        String
+  domain       String
+  language     String?
+  vertical     Vertical      @default(web)
+  status       ContentStatus @default(pending)
+  contentHash  String
+  simhash      String?
+  wordCount    Int?
+  publishedAt  DateTime?
+  modifiedAt   DateTime?
+  crawledAt    DateTime      @default(now())
+  indexedAt    DateTime?
+  error        String?
+  metadata     Json?
+
+  chunks       DocumentChunk[]
+  versions     DocumentVersion[]
+  crawlTasks   CrawlTask[]
+
+  @@index([domain])
+  @@index([status])
+  @@index([contentHash])
+  @@index([vertical, status])
+}
+
+enum Vertical {
+  web
+  code
+  docs
+}
+
+enum ContentStatus {
+  pending
+  indexed
+  failed
+  excluded
+  duplicate
+}
+
+model DocumentChunk {
+  id         String   @id @default(cuid())
+  documentId String
+  idx        Int
+  text       String
+  heading    String?
+  tokenCount Int?
+  embedded   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, idx])
+  @@index([embedded])
+}
+
+model DocumentVersion {
+  id          String   @id @default(cuid())
+  documentId  String
+  version     Int
+  contentHash String
+  createdAt   DateTime @default(now())
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, version])
+}
+
+model CrawlJob {
+  id             String         @id @default(cuid())
+  name           String?
+  seeds          String[]
+  status         CrawlJobStatus @default(pending)
+  maxPages       Int            @default(1000)
+  maxDepth       Int            @default(3)
+  includePatterns String[]
+  excludePatterns String[]
+  respectRobots  Boolean        @default(true)
+  createdAt      DateTime       @default(now())
+  startedAt      DateTime?
+  finishedAt     DateTime?
+  pausedAt       DateTime?
+  checkpoint     Json?
+
+  tasks CrawlTask[]
+
+  @@index([status])
+}
+
+enum CrawlJobStatus {
+  pending
+  running
+  paused
+  completed
+  failed
+  cancelled
+}
+
+model CrawlTask {
+  id           String        @id @default(cuid())
+  jobId        String
+  documentId   String?       @unique
+  url          String
+  depth        Int           @default(0)
+  status       CrawlTaskStatus @default(pending)
+  attempts     Int           @default(0)
+  statusCode   Int?
+  contentType  String?
+  contentLength Int?
+  latencyMs    Int?
+  etag         String?
+  lastModified String?
+  redirectChain String[]
+  error        String?
+  createdAt    DateTime      @default(now())
+  completedAt  DateTime?
+
+  job      CrawlJob  @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  document Document? @relation(fields: [documentId], references: [id])
+
+  @@unique([jobId, url])
+  @@index([status])
+  @@index([jobId, status])
+}
+
+enum CrawlTaskStatus {
+  pending
+  fetching
+  parsing
+  done
+  failed
+  skipped
+}
+
+// ─── Search sessions, queries, workspaces ──────────────────────────────────
+
+model SearchQuery {
+  id          String   @id @default(cuid())
+  userId      String?
+  sessionKey  String?  // pseudonymous session id, never a raw PII string
+  raw         String
+  normalized  String
+  intent      String?
+  language    String?
+  resultCount Int
+  tookMs      Int
+  profile     String?
+  createdAt   DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
+  @@index([createdAt])
+}
+
+model SearchSession {
+  id        String   @id @default(cuid())
+  userId    String
+  startedAt DateTime @default(now())
+  endedAt   DateTime?
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model SearchWorkspace {
+  id             String    @id @default(cuid())
+  ownerId        String
+  organizationId String?
+  name           String
+  description    String?
+  isPublic       Boolean   @default(false)
+  shareToken     String?   @unique
+  shareExpiresAt DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  owner        User          @relation(fields: [ownerId], references: [id])
+  organization Organization? @relation(fields: [organizationId], references: [id])
+  pinned       PinnedResult[]
+  notes        WorkspaceNote[]
+
+  @@index([ownerId])
+}
+
+model PinnedResult {
+  id          String   @id @default(cuid())
+  workspaceId String
+  url         String
+  title       String
+  snippet     String?
+  pinnedAt    DateTime @default(now())
+
+  workspace SearchWorkspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+}
+
+model WorkspaceNote {
+  id          String   @id @default(cuid())
+  workspaceId String
+  content     String
+  citations   Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace SearchWorkspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+}
+
+// ─── Index management ──────────────────────────────────────────────────────
+
+model IndexAlias {
+  id          String   @id @default(cuid())
+  vertical    Vertical
+  alias       String   @unique
+  activeIndex String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model IndexSnapshot {
+  id           String   @id @default(cuid())
+  indexName    String
+  snapshotName String
+  repository   String
+  docCount     Int
+  sizeBytes    BigInt
+  createdAt    DateTime @default(now())
+
+  @@index([indexName])
+}
+
+// ─── Usage, audit, billing ─────────────────────────────────────────────────
+
+model UsageRecord {
+  id             String   @id @default(cuid())
+  organizationId String
+  apiKeyId       String?
+  kind           UsageKind
+  quantity       Int
+  occurredAt     DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  apiKey       ApiKey?      @relation(fields: [apiKeyId], references: [id])
+
+  @@index([organizationId, occurredAt])
+}
+
+enum UsageKind {
+  search
+  crawl_url
+  indexed_doc
+  ai_token
+  storage_byte
+}
+
+model AuditLog {
+  id             String   @id @default(cuid())
+  organizationId String?
+  userId         String?
+  action         String
+  target         String?
+  detail         Json?
+  ip             String?
+  createdAt      DateTime @default(now())
+
+  organization Organization? @relation(fields: [organizationId], references: [id])
+  user         User?         @relation(fields: [userId], references: [id])
+
+  @@index([organizationId, createdAt])
+}
+
+model BillingAccount {
+  id             String   @id @default(cuid())
+  organizationId String   @unique
+  provider       String
+  externalId     String?
+  plan           String   @default("free")
+  status         String   @default("active")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+}
+
+// ─── Connectors, collections, alerts ───────────────────────────────────────
+
+model Connector {
+  id          String   @id @default(cuid())
+  kind        String // github, s3, webdav, rss...
+  name        String
+  config      Json
+  enabled     Boolean  @default(true)
+  lastSyncAt  DateTime?
+  createdAt   DateTime @default(now())
+
+  collections Collection[]
+}
+
+model Collection {
+  id          String   @id @default(cuid())
+  connectorId String?
+  name        String
+  description String?
+  trustBoost  Float    @default(0) // ranking trust preference
+  createdAt   DateTime @default(now())
+
+  connector Connector? @relation(fields: [connectorId], references: [id])
+}
+
+model Alert {
+  id         String     @id @default(cuid())
+  kind       String
+  severity   String     @default("info")
+  message    String
+  resolvedAt DateTime?
+  createdAt  DateTime   @default(now())
+}
