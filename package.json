@@ -1,0 +1,40 @@
+{
+  "name": "luma-search",
+  "version": "0.0.0",
+  "private": true,
+  "description": "LumaSearch - A production-grade, open-source, self-hostable, SaaS-ready next-generation search engine",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "build:prod": "turbo run build --filter=./apps/* --filter=./packages/*",
+    "lint": "turbo run lint",
+    "lint:fix": "turbo run lint:fix",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "test:watch": "turbo run test:watch",
+    "test:coverage": "turbo run test:coverage",
+    "db:generate": "turbo run db:generate",
+    "db:push": "turbo run db:push",
+    "db:migrate": "turbo run db:migrate",
+    "db:studio": "turbo run db:studio",
+    "format": "prettier --write \"**/*.{ts,tsx,json,md,yaml,yml}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,json,md,yaml,yml}\"",
+    "prepare": "husky install",
+    "bootstrap": "pnpm install && pnpm run db:generate && pnpm run build",
+    "clean": "turbo run clean && rm -rf node_modules .turbo"
+  },
+  "devDependencies": {
+    "@turbo/gen": "^1.13.0",
+    "eslint": "^8.57.0",
+    "husky": "^9.0.11",
+    "prettier": "^3.2.5",
+    "turbo": "^1.13.0",
+    "typescript": "^5.4.0",
+    "vitest": "^1.4.0"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "packageManager": "pnpm@9.0.6"
+}
