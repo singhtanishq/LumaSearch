@@ -120,9 +120,30 @@ export function canonicalizeUrl(rawUrl: string, options: CanonicalUrlOptions = {
  * Extract registrable domain (approximate: last two labels; handles common multi-part TLDs).
  */
 const MULTIPART_TLDS = new Set([
-  'co.uk', 'org.uk', 'ac.uk', 'gov.uk', 'co.jp', 'co.kr', 'com.au', 'co.nz',
-  'com.br', 'com.mx', 'co.in', 'com.tr', 'com.cn', 'com.tw', 'co.za', 'com.sg',
-  'com.hk', 'org.au', 'net.au', 'gov.au', 'edu.au', 'co.il', 'com.ar', 'com.pl',
+  'co.uk',
+  'org.uk',
+  'ac.uk',
+  'gov.uk',
+  'co.jp',
+  'co.kr',
+  'com.au',
+  'co.nz',
+  'com.br',
+  'com.mx',
+  'co.in',
+  'com.tr',
+  'com.cn',
+  'com.tw',
+  'co.za',
+  'com.sg',
+  'com.hk',
+  'org.au',
+  'net.au',
+  'gov.au',
+  'edu.au',
+  'co.il',
+  'com.ar',
+  'com.pl',
 ]);
 
 export function extractDomain(url: string): string | null {

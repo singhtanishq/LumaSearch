@@ -26,7 +26,10 @@ export function estimateTokens(text: string): number {
  */
 export function chunkText(text: string, options: ChunkOptions = {}): string[] {
   const opts = { ...DEFAULT_CHUNK, ...options };
-  const paragraphs = text.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean);
+  const paragraphs = text
+    .split(/\n{2,}/)
+    .map((p) => p.trim())
+    .filter(Boolean);
   const chunks: string[] = [];
   let current: string[] = [];
   let currentTokens = 0;

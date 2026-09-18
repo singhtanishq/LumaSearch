@@ -243,12 +243,7 @@ export interface EvidencePassage {
 // ─── Crawling ────────────────────────────────────────────────────────────────
 
 export type CrawlJobStatus =
-  | 'pending'
-  | 'running'
-  | 'paused'
-  | 'completed'
-  | 'failed'
-  | 'cancelled';
+  'pending' | 'running' | 'paused' | 'completed' | 'failed' | 'cancelled';
 
 export interface CrawlJob {
   id: string;

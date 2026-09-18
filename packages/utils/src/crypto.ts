@@ -14,9 +14,39 @@ export function hashToId(prefix: string, hash: string, length = 24): string {
 // ─── Simhash ────────────────────────────────────────────────────────────────
 
 const STOPWORDS = new Set([
-  'a', 'an', 'the', 'and', 'or', 'but', 'if', 'then', 'of', 'to', 'in', 'on',
-  'at', 'by', 'for', 'with', 'is', 'are', 'was', 'were', 'be', 'been', 'it',
-  'this', 'that', 'as', 'from', 'we', 'you', 'they', 'he', 'she', 'its',
+  'a',
+  'an',
+  'the',
+  'and',
+  'or',
+  'but',
+  'if',
+  'then',
+  'of',
+  'to',
+  'in',
+  'on',
+  'at',
+  'by',
+  'for',
+  'with',
+  'is',
+  'are',
+  'was',
+  'were',
+  'be',
+  'been',
+  'it',
+  'this',
+  'that',
+  'as',
+  'from',
+  'we',
+  'you',
+  'they',
+  'he',
+  'she',
+  'its',
 ]);
 
 function tokenize(text: string): string[] {
@@ -90,7 +120,11 @@ export function hammingDistance(a: string, b: string): number {
 /**
  * True when two simhashes are within near-duplicate threshold (default 6 of 64 bits).
  */
-export function isNearDuplicate(a: string | undefined, b: string | undefined, threshold = 6): boolean {
+export function isNearDuplicate(
+  a: string | undefined,
+  b: string | undefined,
+  threshold = 6
+): boolean {
   if (!a || !b) return false;
   return hammingDistance(a, b) <= threshold;
 }

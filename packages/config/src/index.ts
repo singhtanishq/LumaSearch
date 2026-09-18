@@ -86,7 +86,9 @@ export const emailEnvSchema = z.object({
  * Crawler environment schema
  */
 export const crawlerEnvSchema = z.object({
-  CRAWLER_USER_AGENT: z.string().default('LumaSearch/0.1 (+https://github.com/luma-search/luma-search)'),
+  CRAWLER_USER_AGENT: z
+    .string()
+    .default('LumaSearch/0.1 (+https://github.com/luma-search/luma-search)'),
   CRAWLER_MAX_CONCURRENT: z.coerce.number().int().min(1).default(10),
   CRAWLER_PER_DOMAIN_CONCURRENT: z.coerce.number().int().min(1).default(2),
   CRAWLER_POLITENESS_DELAY: z.coerce.number().int().min(0).default(1000),
@@ -132,7 +134,9 @@ export const embeddingsEnvSchema = z.object({
  * LLM environment schema
  */
 export const llmEnvSchema = z.object({
-  LLM_PROVIDER: z.enum(['openai', 'anthropic', 'ollama', 'vertex', 'bedrock', 'disabled']).default('disabled'),
+  LLM_PROVIDER: z
+    .enum(['openai', 'anthropic', 'ollama', 'vertex', 'bedrock', 'disabled'])
+    .default('disabled'),
   OPENAI_API_KEY: z.string().optional(),
   OPENAI_CHAT_MODEL: z.string().default('gpt-4o-mini'),
   OPENAI_MAX_TOKENS: z.coerce.number().int().min(1).default(4096),

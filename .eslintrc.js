@@ -5,15 +5,7 @@ module.exports = {
     es2022: true,
   },
   extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended', 'prettier'],
-  ignorePatterns: [
-    'node_modules/',
-    'dist/',
-    'build/',
-    '.turbo/',
-    '.next/',
-    'coverage/',
-    '*.d.ts',
-  ],
+  ignorePatterns: ['node_modules/', 'dist/', 'build/', '.turbo/', '.next/', 'coverage/', '*.d.ts'],
   parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaVersion: 'latest',
