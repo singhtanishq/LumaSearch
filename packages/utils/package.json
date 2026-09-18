@@ -1,0 +1,52 @@
+{
+  "name": "@luma-search/utils",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    },
+    "./crypto": {
+      "types": "./dist/crypto.d.ts",
+      "import": "./dist/crypto.js",
+      "require": "./dist/crypto.js"
+    },
+    "./url": {
+      "types": "./dist/url.d.ts",
+      "import": "./dist/url.js",
+      "require": "./dist/url.js"
+    },
+    "./text": {
+      "types": "./dist/text.d.ts",
+      "import": "./dist/text.js",
+      "require": "./dist/text.js"
+    },
+    "./date": {
+      "types": "./dist/date.d.ts",
+      "import": "./dist/date.js",
+      "require": "./dist/date.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "simhash-js": "^1.0.0",
+    "fast-sha256": "^1.0.0"
+  },
+  "devDependencies": {
+    "@luma-search/tsconfig": "workspace:*",
+    "@types/node": "^20.11.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.0"
+  }
+}
