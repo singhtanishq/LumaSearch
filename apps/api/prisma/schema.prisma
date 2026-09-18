@@ -87,7 +87,7 @@ model DocumentChunk {
   startOffset Int
   endOffset   Int
   headingPath String[]  // Hierarchy of headings
-  embedding   Float[]?  // Vector embedding for semantic search
+  embedding   Float[]   // Vector embedding for semantic search
   
   @@map("document_chunks")
 }
@@ -102,6 +102,17 @@ model CodeIndexSymbol {
   columnNumber Int
   
   @@map("code_index_symbols")
+}
+
+model CodeIndexLink {
+  id          String    @id @default(cuid())
+  codeIndex   CodeIndex @relation(fields: [codeIndexId], references: [id])
+  codeIndexId String
+  sourceUrl   String
+  anchorText  String
+  rel         String?
+  
+  @@map("code_index_links")
 }
 
 model Organization {
