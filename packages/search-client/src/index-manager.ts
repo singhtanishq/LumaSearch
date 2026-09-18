@@ -32,9 +32,7 @@ export class IndexManager {
   }
 
   async aliasExists(vertical: Vertical): Promise<boolean> {
-    return this.client.indices
-      .existsAlias({ name: this.aliasName(vertical) })
-      .then((r) => r === true || Boolean((r as { body?: boolean }).body));
+    return this.client.indices.existsAlias({ name: this.aliasName(vertical) });
   }
 
   async getActiveIndex(vertical: Vertical): Promise<string | null> {
