@@ -14,4 +14,7 @@ pnpm-lock.yaml
 .turbo
 *.config.ts
 *.config.js
-*.tsbuildinfo
+*.tsbuildinfocontext.md
+auto-push.sh
+.zcode/
+.gitleaks.toml

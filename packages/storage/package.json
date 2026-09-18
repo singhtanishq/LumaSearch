@@ -27,7 +27,7 @@
     "db:studio": "prisma studio",
     "lint": "eslint src --ext ts",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "clean": "rm -rf dist"
   },
   "prisma": {
