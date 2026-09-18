@@ -1,0 +1,3 @@
+FROM luma-base AS worker
+WORKDIR /workspace/apps/worker
+CMD ["pnpm", "start"]
