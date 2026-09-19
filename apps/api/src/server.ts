@@ -7,13 +7,13 @@ import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import { validateEnv, SearchEnv, LLMEnv } from '@luma-search/config';
 import { createLogger, initMetrics, runHealthChecks, HealthCheck } from '@luma-search/telemetry';
-import { createSearchClient, checkSearchHealth, IndexManager } from '@luma-search/search-client';
+import { createSearchClient, checkSearchHealth, IndexManager, buildHybridBody, buildLexicalBody } from '@luma-search/search-client';
 import { createPrismaClient, checkDbHealth } from '@luma-search/storage';
 import { createLLMProvider } from '@luma-search/llm';
 import { AnswerEngine } from '@luma-search/evidence';
 import { interpretQuery, filtersFromOperators } from '@luma-search/query';
 import { canonicalizeUrl } from '@luma-search/utils';
-import type { SearchResponse, SearchFilters, RankingProfile } from '@luma-search/types';
+import type { SearchResponse, SearchFilters, RankingProfile, LLMProviderKind } from '@luma-search/types';
 
 const log = createLogger({ service: 'api' });
 const metrics = initMetrics();
@@ -43,7 +43,7 @@ const indexManager = new IndexManager(es, {
 
 const prisma = createPrismaClient();
 const llm = createLLMProvider({
-  provider: llmEnv.LLM_PROVIDER,
+  provider: llmEnv.LLM_PROVIDER as LLMProviderKind,
   openai: { apiKey: llmEnv.OPENAI_API_KEY, model: llmEnv.OPENAI_CHAT_MODEL, maxTokens: llmEnv.OPENAI_MAX_TOKENS, temperature: llmEnv.OPENAI_TEMPERATURE },
   anthropic: { apiKey: llmEnv.ANTHROPIC_API_KEY, model: llmEnv.ANTHROPIC_CHAT_MODEL, maxTokens: llmEnv.ANTHROPIC_MAX_TOKENS, temperature: llmEnv.ANTHROPIC_TEMPERATURE },
   ollama: { url: llmEnv.OLLAMA_URL, model: llmEnv.OLLAMA_CHAT_MODEL },
@@ -84,8 +84,8 @@ async function buildServer(): Promise<FastifyInstance> {
   });
 
   await server.register(rateLimit, {
-    max: searchEnv.RATE_LIMIT_MAX_REQUESTS,
-    timeWindow: searchEnv.RATE_LIMIT_WINDOW_MS,
+    max: _searchEnv.RATE_LIMIT_MAX_REQUESTS,
+    timeWindow: _searchEnv.RATE_LIMIT_WINDOW_MS,
     keyGenerator: (req) => req.ip,
   });
 
@@ -120,7 +120,7 @@ async function buildServer(): Promise<FastifyInstance> {
     };
   }>('/api/v1/search', async (req, reply) => {
     const started = Date.now();
-    const { q, profile = 'hybrid', filters = {}, limit = searchEnv.SEARCH_DEFAULT_LIMIT, offset = 0, debug } = req.body;
+    const { q, profile = 'hybrid', filters = {}, limit = _searchEnv.SEARCH_DEFAULT_LIMIT, offset = 0, debug } = req.body;
 
     if (!q || q.trim().length === 0) {
       return reply.code(400).send({ error: 'Query parameter "q" is required' });
@@ -135,14 +135,14 @@ async function buildServer(): Promise<FastifyInstance> {
       ? buildHybridBody(interpretation.normalized, operators, {
           profile,
           filters: searchFilters,
-          limit: Math.min(limit, searchEnv.SEARCH_MAX_LIMIT),
+          limit: Math.min(limit, _searchEnv.SEARCH_MAX_LIMIT),
           offset,
           queryVector,
         })
       : buildLexicalBody(interpretation.normalized, operators, {
           profile,
           filters: searchFilters,
-          limit: Math.min(limit, searchEnv.SEARCH_MAX_LIMIT),
+          limit: Math.min(limit, _searchEnv.SEARCH_MAX_LIMIT),
           offset,
         });
 
