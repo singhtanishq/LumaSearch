@@ -67,36 +67,39 @@ export default function HomePage() {
   const [offset, setOffset] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const search = useCallback(async (q: string, isLoadMore = false) => {
-    if (!q.trim()) return;
-    setLoading(true);
-    setError(null);
-    if (!isLoadMore) {
-      setOffset(0);
-      setResults([]);
-      setAnswer(null);
-    }
-    try {
-      const res = await fetch(`${API_URL}/api/v1/search`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ q, profile, limit: 10, offset }),
-      });
-      if (!res.ok) throw new Error(`Search failed: ${res.status}`);
-      const data: SearchResponse = await res.json();
-      if (isLoadMore) {
-        setResults(prev => [...prev, ...data.results]);
-      } else {
-        setResults(data.results);
+  const search = useCallback(
+    async (q: string, isLoadMore = false) => {
+      if (!q.trim()) return;
+      setLoading(true);
+      setError(null);
+      if (!isLoadMore) {
+        setOffset(0);
+        setResults([]);
+        setAnswer(null);
       }
-      setTotal(data.total);
-      setTook(data.took);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Search failed');
-    } finally {
-      setLoading(false);
-    }
-  }, [profile, offset]);
+      try {
+        const res = await fetch(`${API_URL}/api/v1/search`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ q, profile, limit: 10, offset }),
+        });
+        if (!res.ok) throw new Error(`Search failed: ${res.status}`);
+        const data: SearchResponse = await res.json();
+        if (isLoadMore) {
+          setResults((prev) => [...prev, ...data.results]);
+        } else {
+          setResults(data.results);
+        }
+        setTotal(data.total);
+        setTook(data.took);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Search failed');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [profile, offset]
+  );
 
   const generateAnswer = useCallback(async (q: string) => {
     if (!q.trim()) return;
@@ -137,7 +140,10 @@ export default function HomePage() {
   useEffect(() => {
     inputRef.current?.focus();
     document.addEventListener('keydown', (e) => {
-      if ((e.key === '/' || (e.metaKey && e.key === 'k')) && document.activeElement !== inputRef.current) {
+      if (
+        (e.key === '/' || (e.metaKey && e.key === 'k')) &&
+        document.activeElement !== inputRef.current
+      ) {
         e.preventDefault();
         inputRef.current?.focus();
       }
@@ -197,7 +203,12 @@ export default function HomePage() {
                 aria-label="Clear"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             )}
@@ -217,7 +228,10 @@ export default function HomePage() {
             total={total}
             took={took}
             query={query}
-            onLoadMore={() => { setOffset(o => o + 10); search(query, true); }}
+            onLoadMore={() => {
+              setOffset((o) => o + 10);
+              search(query, true);
+            }}
             hasMore={results.length < total}
           />
         )}
@@ -235,10 +249,22 @@ export default function HomePage() {
           <div className="text-center py-16 text-gray-500 dark:text-gray-400">
             <p className="text-lg mb-2">Start typing to search</p>
             <p className="text-sm">
-              Try: <code className="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">site:github.com typescript</code>{' '}
-              or <code className="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">"exact phrase" -exclude</code>
+              Try:{' '}
+              <code className="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">
+                site:github.com typescript
+              </code>{' '}
+              or{' '}
+              <code className="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">
+                "exact phrase" -exclude
+              </code>
             </p>
-            <p className="text-sm mt-2">Shortcuts: <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded">/</kbd> focus · <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded">⌘K</kbd> focus · <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded">⌘+Enter</kbd> answer</p>
+            <p className="text-sm mt-2">
+              Shortcuts: <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded">/</kbd>{' '}
+              focus · <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded">⌘K</kbd>{' '}
+              focus ·{' '}
+              <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded">⌘+Enter</kbd>{' '}
+              answer
+            </p>
           </div>
         )}
       </main>
@@ -246,7 +272,12 @@ export default function HomePage() {
       <footer className="border-t border-gray-200 dark:border-gray-800 px-4 py-4">
         <p className="text-center text-sm text-gray-500 dark:text-gray-400 max-w-5xl mx-auto">
           LumaSearch — Self-hostable, open-source search engine.{' '}
-          <a href="https://github.com/singhtanishq/LumaSearch" target="_blank" rel="noopener" className="underline hover:text-blue-600">
+          <a
+            href="https://github.com/singhtanishq/LumaSearch"
+            target="_blank"
+            rel="noopener"
+            className="underline hover:text-blue-600"
+          >
             GitHub
           </a>
         </p>
