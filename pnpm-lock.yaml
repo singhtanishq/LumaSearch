@@ -129,6 +129,9 @@ importers:
       '@luma-search/utils':
         specifier: workspace:*
         version: link:../../packages/utils
+      '@prisma/client':
+        specifier: ^5.22.0
+        version: 5.22.0(prisma@5.22.0)
       fastify:
         specifier: ^4.27.0
         version: 4.29.1
@@ -236,6 +239,9 @@ importers:
       '@luma-search/utils':
         specifier: workspace:*
         version: link:../../packages/utils
+      '@prisma/client':
+        specifier: ^5.22.0
+        version: 5.22.0(prisma@5.22.0)
       bullmq:
         specifier: ^5.7.0
         version: 5.81.5
