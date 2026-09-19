@@ -7,9 +7,9 @@ x-common-env: &common-env
   ELASTICSEARCH_URL: ${ELASTICSEARCH_URL:-http://elasticsearch:9200}
   EMBEDDING_LOCAL_URL: ${EMBEDDING_LOCAL_URL:-http://embeddings:8000}
   OLLAMA_URL: ${OLLAMA_URL:-http://ollama:11434}
-  JWT_SECRET: ${JWT_SECRET}
-  SESSION_SECRET: ${SESSION_SECRET}
-  CSRF_SECRET: ${CSRF_SECRET}
+  JWT_SECRET: ${JWT_SECRET:-dev-secret-change-in-production-min-32-chars-long-enough}
+  SESSION_SECRET: ${SESSION_SECRET:-dev-session-secret-change-in-production-min-32-chars-enough}
+  CSRF_SECRET: ${CSRF_SECRET:-dev-csrf-secret-change-in-production-min-32-chars-enough}
   SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-false}
   LLM_PROVIDER: ${LLM_PROVIDER:-disabled}
   ELASTICSEARCH_USERNAME: ${ELASTICSEARCH_USERNAME:-}
