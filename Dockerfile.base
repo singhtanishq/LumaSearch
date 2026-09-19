@@ -27,14 +27,14 @@ COPY packages/evidence/package.json packages/evidence/
 COPY packages/storage/package.json packages/storage/
 COPY packages/queue/package.json packages/queue/
 
-# Copy Prisma schema
+# Copy Prisma schema and config
 COPY packages/storage/prisma ./packages/storage/prisma
 
 # Install dependencies
 RUN pnpm install --frozen-lockfile || pnpm install
 
-# Generate Prisma client (use PRISMA_CLI_QUERY_ENGINE_TYPE=binary to avoid engine download issues)
-RUN PRISMA_CLI_QUERY_ENGINE_TYPE=binary npx prisma generate --schema=./packages/storage/prisma/schema.prisma
+# Generate Prisma client (no database connection needed for generation)
+RUN npx prisma generate --schema=./packages/storage/prisma/schema.prisma
 
 # Copy sources and build packages
 COPY . .
