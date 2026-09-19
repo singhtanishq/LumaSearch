@@ -116,7 +116,7 @@ services:
   web:
     build:
       context: .
-      dockerfile: infra/docker/Dockerfile.web
+      dockerfile: Dockerfile.web
     restart: unless-stopped
     environment:
       <<: *common-env
