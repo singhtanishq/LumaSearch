@@ -110,7 +110,7 @@ async function main() {
   await es.close();
 }
 
-main().catch(err => {
+main().catch((err) => {
   console.error('❌ Seed failed:', err);
   process.exit(1);
 });
