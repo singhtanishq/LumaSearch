@@ -350,7 +350,7 @@ async function processAnswerGenerate(job: { data: AnswerJobData }) {
   log.info({ query, profile }, 'Processing answer generate');
 
   try {
-    const answer = await answerEngine.generateAnswer(query, { profile });
+    const answer = await answerEngine.generateAnswer(query, { profile: profile as 'hybrid' | 'fastest' | 'recent' | 'primary-sources' | 'technical' | 'community' | 'documentation' | 'research' | 'exact' });
     log.info({ query, took: answer.took }, 'Answer generated');
     return { success: true, answer };
   } catch (err) {
