@@ -17,11 +17,34 @@ const DEFAULTS: Required<TrapConfig> = {
   maxDepthSegments: 12,
   maxSamePatternUrls: 100,
   blockedExtensions: [
-    '.zip', '.tar', '.gz', '.bz2', '.7z', '.rar', '.exe', '.dmg', '.pkg',
-    '.iso', '.img', '.mp4', '.mkv', '.avi', '.mov', '.mp3', '.flac', '.apk',
-    '.deb', '.rpm', '.bin', '.woff', '.woff2', '.ttf', '.pdf.download',
+    '.zip',
+    '.tar',
+    '.gz',
+    '.bz2',
+    '.7z',
+    '.rar',
+    '.exe',
+    '.dmg',
+    '.pkg',
+    '.iso',
+    '.img',
+    '.mp4',
+    '.mkv',
+    '.avi',
+    '.mov',
+    '.mp3',
+    '.flac',
+    '.apk',
+    '.deb',
+    '.rpm',
+    '.bin',
+    '.woff',
+    '.woff2',
+    '.ttf',
+    '.pdf.download',
   ],
-  sessionParamPattern: /^(phpsessid|jsessionid|aspsessionid|sid|sessionid|session_id|cfid|cftoken)$/i,
+  sessionParamPattern:
+    /^(phpsessid|jsessionid|aspsessionid|sid|sessionid|session_id|cfid|cftoken)$/i,
 };
 
 export class TrapDetector {
@@ -74,9 +97,7 @@ export class TrapDetector {
     // Collapse digit runs and long hex/base64 segments to a bucket shape
     const pathShape = parsed.pathname
       .split('/')
-      .map((seg) =>
-        /^\d+$/.test(seg) ? '{n}' : /^[a-f0-9]{16,}$/i.test(seg) ? '{h}' : seg
-      )
+      .map((seg) => (/^\d+$/.test(seg) ? '{n}' : /^[a-f0-9]{16,}$/i.test(seg) ? '{h}' : seg))
       .join('/');
     const paramKeys = Array.from(parsed.searchParams.keys()).sort().join(',');
     return `${parsed.host}${pathShape}?${paramKeys}`;
