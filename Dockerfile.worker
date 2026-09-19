@@ -1,4 +1,5 @@
 FROM luma-base AS worker
 WORKDIR /workspace/apps/worker
-# Prisma client is already available in base image
+# Generate Prisma client in this image (needs DATABASE_URL for generation)
+RUN DATABASE_URL="postgresql://luma:luma@postgres:5432/luma_search" npx prisma generate --schema=../../packages/storage/prisma/schema.prisma
 CMD ["pnpm", "start"]
