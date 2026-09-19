@@ -198,6 +198,10 @@ export interface SearchDebug {
   explanation?: unknown;
 }
 
+// ─── LLM Providers ───────────────────────────────────────────────────────────
+
+export type LLMProviderKind = 'openai' | 'anthropic' | 'ollama' | 'vertex' | 'bedrock' | 'disabled';
+
 // ─── AI Answers & Evidence ───────────────────────────────────────────────────
 
 export interface Citation {
