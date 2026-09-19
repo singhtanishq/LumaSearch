@@ -27,8 +27,9 @@ COPY packages/evidence/package.json packages/evidence/
 COPY packages/storage/package.json packages/storage/
 COPY packages/queue/package.json packages/queue/
 
-# Copy Prisma schema
+# Copy Prisma schema - verify it exists
 COPY packages/storage/prisma ./packages/storage/prisma
+RUN ls -la /workspace/packages/storage/prisma/
 
 # Install dependencies
 RUN pnpm install --frozen-lockfile || pnpm install
