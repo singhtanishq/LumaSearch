@@ -62,7 +62,7 @@ services:
   # ─── Application services ─────────────────────────────────────────────────
   api:
     build:
-      context: .
+      context: ..
       dockerfile: Dockerfile.api
     restart: unless-stopped
     environment:
@@ -78,12 +78,12 @@ services:
       elasticsearch:
         condition: service_healthy
     volumes:
-      - ./apps:/workspace/apps
-      - ./packages:/workspace/packages
+      - ../apps:/workspace/apps
+      - ../packages:/workspace/packages
 
   worker:
     build:
-      context: .
+      context: ..
       dockerfile: Dockerfile.worker
     restart: unless-stopped
     environment:
@@ -96,12 +96,12 @@ services:
       elasticsearch:
         condition: service_healthy
     volumes:
-      - ./apps:/workspace/apps
-      - ./packages:/workspace/packages
+      - ../apps:/workspace/apps
+      - ../packages:/workspace/packages
 
   embeddings:
     build:
-      context: .
+      context: ..
       dockerfile: Dockerfile.embeddings
     restart: unless-stopped
     ports:
@@ -115,7 +115,7 @@ services:
 
   web:
     build:
-      context: .
+      context: ..
       dockerfile: Dockerfile.web
     restart: unless-stopped
     environment:
@@ -126,8 +126,8 @@ services:
     depends_on:
       - api
     volumes:
-      - ./apps/web:/workspace/apps/web
-      - ./packages:/workspace/packages
+      - ../apps/web:/workspace/apps/web
+      - ../packages:/workspace/packages
 
 volumes:
   postgres-data:
