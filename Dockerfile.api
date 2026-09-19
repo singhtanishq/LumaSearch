@@ -1,6 +1,6 @@
 FROM luma-base AS api
 WORKDIR /workspace/apps/api
-# Generate Prisma client in this image (needs DATABASE_URL for generation)
-RUN DATABASE_URL="postgresql://luma:luma@postgres:5432/luma_search" npx prisma generate --schema=../../packages/storage/prisma/schema.prisma
+# Generate Prisma client in this image using local prisma
+RUN ./packages/storage/node_modules/.bin/prisma generate --schema=../../packages/storage/prisma/schema.prisma
 EXPOSE 4000
 CMD ["pnpm", "start"]
