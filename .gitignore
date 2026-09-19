@@ -107,8 +107,6 @@ pnpm-debug.log*
 .npmrc
 !.npmrc.example
 
-node_modules/
-
 
 # =========================================================
 # PHP / Laravel
@@ -236,8 +234,12 @@ backups/
 
 tmp/
 temp/
+
+# Temporary files
 *.tmp
+*.tmp.*
 *.temp
+*.temp.*
 
 logs/
 *.log
