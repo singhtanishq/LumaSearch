@@ -94,7 +94,10 @@ export class Fetcher {
     }
   }
 
-  async fetch(url: string, conditional?: { etag?: string; lastModified?: string }): Promise<FetchResult> {
+  async fetch(
+    url: string,
+    conditional?: { etag?: string; lastModified?: string }
+  ): Promise<FetchResult> {
     const result: FetchResult = {
       ok: false,
       url,
@@ -136,7 +139,10 @@ export class Fetcher {
 
     const started = Date.now();
     try {
-      const headers: Record<string, string> = { 'user-agent': this.opts.userAgent, accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' };
+      const headers: Record<string, string> = {
+        'user-agent': this.opts.userAgent,
+        accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      };
       if (conditional?.etag) headers['if-none-match'] = conditional.etag;
       if (conditional?.lastModified) headers['if-modified-since'] = conditional.lastModified;
 
@@ -154,7 +160,7 @@ export class Fetcher {
       result.finalUrl = res.url || url;
       result.statusCode = res.status;
 
-      const chain = [url, ...res.url !== url ? [res.url] : []];
+      const chain = [url, ...(res.url !== url ? [res.url] : [])];
       result.redirectChain = chain;
 
       const contentLength = Number(res.headers.get('content-length') ?? 0);
