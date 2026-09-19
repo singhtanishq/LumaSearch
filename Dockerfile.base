@@ -1,5 +1,5 @@
 # Shared base image with dependencies and packages built.
-# Build from repo root: docker build -f infra/docker/Dockerfile.base -t luma-base .
+# Build from repo root: docker build -f Dockerfile.base -t luma-base .
 FROM node:20-alpine AS base
 RUN apk add --no-cache libc6-compat
 RUN corepack enable
@@ -12,7 +12,7 @@ COPY apps/worker/package.json apps/worker/
 COPY apps/web/package.json apps/web/
 COPY apps/admin/package.json apps/admin/
 
-# Copy all packages
+# Copy all packages that have package.json
 COPY packages/tsconfig/package.json packages/tsconfig/
 COPY packages/config/package.json packages/config/
 COPY packages/types/package.json packages/types/
@@ -22,13 +22,10 @@ COPY packages/search-client/package.json packages/search-client/
 COPY packages/crawler-core/package.json packages/crawler-core/
 COPY packages/embeddings/package.json packages/embeddings/
 COPY packages/llm/package.json packages/llm/
-COPY packages/ranking/package.json packages/ranking/
 COPY packages/query/package.json packages/query/
 COPY packages/evidence/package.json packages/evidence/
 COPY packages/storage/package.json packages/storage/
 COPY packages/queue/package.json packages/queue/
-COPY packages/auth/package.json packages/auth/
-COPY packages/test-utils/package.json packages/test-utils/
 
 # Install dependencies
 RUN pnpm install --frozen-lockfile || pnpm install
