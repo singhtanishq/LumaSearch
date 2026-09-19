@@ -346,7 +346,7 @@ async function processEmbedGenerate(job: { data: EmbedJobData }) {
 }
 
 async function processAnswerGenerate(job: { data: AnswerJobData }) {
-  const { query, profile, userId } = job.data;
+  const { query, profile, userId: _userId } = job.data;
   log.info({ query, profile }, 'Processing answer generate');
 
   try {
