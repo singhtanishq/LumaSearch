@@ -23,89 +23,117 @@ export function estimateTokens(text: string): number {
 
 /**
  * Chunk text on paragraph/sentence boundaries with token overlap.
+ * Handles both multi-paragraph and single-paragraph text.
  */
 export function chunkText(text: string, options: ChunkOptions = {}): string[] {
   const opts = { ...DEFAULT_CHUNK, ...options };
+  const chunks: string[] = [];
+
+  // First, try to split by paragraphs (double newlines)
   const paragraphs = text
     .split(/\n{2,}/)
     .map((p) => p.trim())
     .filter(Boolean);
-  const chunks: string[] = [];
-  let current: string[] = [];
-  let currentTokens = 0;
 
-  const flush = () => {
-    if (current.length === 0) return;
-    const joined = current.join('\n\n');
-    if (joined.length >= opts.minChunkChars) chunks.push(joined);
-    current = [];
-    currentTokens = 0;
-  };
+  if (paragraphs.length > 1) {
+    // Multi-paragraph: process each paragraph
+    let current: string[] = [];
+    let currentTokens = 0;
 
-  for (const para of paragraphs) {
-    const paraTokens = estimateTokens(para);
-    if (paraTokens > opts.maxTokens) {
-      // Split long paragraphs by sentence, preserving overlap
-      flush();
-      const sentences = para.split(/(?<=[.!?。！？])\s+/);
-      let window: string[] = [];
-      let windowTokens = 0;
-      for (const sentence of sentences) {
-        const st = estimateTokens(sentence);
-        if (windowTokens + st > opts.maxTokens && window.length > 0) {
-          const joined = window.join(' ');
-          if (joined.length >= opts.minChunkChars) chunks.push(joined);
-          // keep tail for overlap
-          const keepFrom = Math.max(0, windowTokens - opts.overlapTokens);
-          let kept: string[] = [];
-          let keptTokens = 0;
-          for (let i = window.length - 1; i >= 0; i--) {
-            keptTokens += estimateTokens(window[i]!);
-            if (windowTokens - keptTokens <= keepFrom) {
-              kept = window.slice(i);
-              break;
-            }
-          }
-          window = kept;
-          windowTokens = keptTokens;
-        }
-        window.push(sentence);
-        windowTokens += st;
+    const flush = () => {
+      if (current.length === 0) return;
+      const joined = current.join('\n\n');
+      if (joined.length >= opts.minChunkChars) chunks.push(joined);
+      current = [];
+      currentTokens = 0;
+    };
+
+    for (const para of paragraphs) {
+      const paraTokens = estimateTokens(para);
+      if (paraTokens > opts.maxTokens) {
+        // Long paragraph: split by sentences
+        flush();
+        chunks.push(...splitLongParagraph(para, opts));
+        continue;
       }
-      if (window.length > 0) {
-        const joined = window.join(' ');
-        if (joined.length >= opts.minChunkChars) chunks.push(joined);
-      }
-      continue;
-    }
 
-    if (currentTokens + paraTokens > opts.maxTokens && current.length > 0) {
-      flush();
+      if (currentTokens + paraTokens > opts.maxTokens && current.length > 0) {
+        flush();
+      }
+      current.push(para);
+      currentTokens += paraTokens;
     }
-    current.push(para);
-    currentTokens += paraTokens;
+    flush();
+    return chunks;
   }
-  flush();
+
+  // Single paragraph or no paragraphs: split by sentences directly
+  return splitLongParagraph(text, opts);
+}
+
+function splitLongParagraph(text: string, opts: Required<ChunkOptions>): string[] {
+  const chunks: string[] = [];
+  const sentences = text.split(/(?<=[.!?。！？])\s+/).filter(Boolean);
+
+  let window: string[] = [];
+  let windowTokens = 0;
+
+  for (const sentence of sentences) {
+    const st = estimateTokens(sentence);
+    if (windowTokens + st > opts.maxTokens && window.length > 0) {
+      const joined = window.join(' ');
+      if (joined.length >= opts.minChunkChars) chunks.push(joined);
+
+      // Keep tail for overlap
+      const keepFrom = Math.max(0, windowTokens - opts.overlapTokens);
+      let kept: string[] = [];
+      let keptTokens = 0;
+      for (let i = window.length - 1; i >= 0; i--) {
+        keptTokens += estimateTokens(window[i]!);
+        if (windowTokens - keptTokens <= keepFrom) {
+          kept = window.slice(i);
+          break;
+        }
+      }
+      window = kept;
+      windowTokens = keptTokens;
+    }
+    window.push(sentence);
+    windowTokens += st;
+  }
+
+  if (window.length > 0) {
+    const joined = window.join(' ');
+    if (joined.length >= opts.minChunkChars) chunks.push(joined);
+  }
+
   return chunks;
 }
 
 /**
  * Strip HTML tags and decode common entities for snippet generation.
+ * Entity decoding happens BEFORE tag removal to preserve < > etc.
  */
 export function stripHtml(html: string): string {
-  return html
-    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
-    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
-    .replace(/<[^>]+>/g, ' ')
+  // First decode entities (but not inside tags)
+  let text = html
     .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&#x27;/g, "'")
-    .replace(/\s+/g, ' ')
-    .trim();
+    .replace(/&/g, '&')
+    .replace(/</g, '<')
+    .replace(/>/g, '>')
+    .replace(/"/g, '"')
+    .replace(/'/g, "'")
+    .replace(/'/g, "'");
+
+  // Remove script/style content entirely
+  text = text.replace(/<script[\s\S]*?<\/script>/gi, ' ');
+  text = text.replace(/<style[\s\S]*?<\/style>/gi, ' ');
+
+  // Remove remaining tags
+  text = text.replace(/<[^>]+>/g, ' ');
+
+  // Clean up whitespace
+  return text.replace(/\s+/g, ' ').trim();
 }
 
 /**
