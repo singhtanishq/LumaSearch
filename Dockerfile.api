@@ -1,5 +1,5 @@
 FROM luma-base AS api
 WORKDIR /workspace/apps/api
-RUN npx prisma generate --schema=../../packages/storage/prisma/schema.prisma
+RUN ./node_modules/.bin/prisma generate --schema=../../packages/storage/prisma/schema.prisma
 EXPOSE 4000
 CMD ["pnpm", "start"]
