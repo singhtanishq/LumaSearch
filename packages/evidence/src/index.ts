@@ -40,7 +40,12 @@ export class AnswerEngine {
 
   async retrievePassages(
     query: string,
-    opts: { filters?: SearchFilters; profile?: RankingProfile; queryVector?: number[]; limit?: number } = {}
+    opts: {
+      filters?: SearchFilters;
+      profile?: RankingProfile;
+      queryVector?: number[];
+      limit?: number;
+    } = {}
   ): Promise<EvidencePassage[]> {
     const limit = Math.min(opts.limit ?? this.opts.maxEvidencePassages, 30);
     const operators = { phrases: [], exclusions: [] };
@@ -59,7 +64,9 @@ export class AnswerEngine {
           offset: 0,
         });
 
-    const searchArgs = { index: 'luma_web', ...body } as unknown as Parameters<SearchClient['search']>[0];
+    const searchArgs = { index: 'luma_web', ...body } as unknown as Parameters<
+      SearchClient['search']
+    >[0];
     const res = await this.es.search(searchArgs);
     const hits = (res.hits?.hits ?? []) as Array<{
       _id?: string;
@@ -118,9 +125,7 @@ export class AnswerEngine {
     let used = 0;
     const parts: string[] = [`Question: ${query}`, '', 'Evidence passages:'];
     passages.forEach((p, i) => {
-      const text = this.opts.promptInjectionDefense
-        ? AnswerEngine.sanitizePassage(p.text)
-        : p.text;
+      const text = this.opts.promptInjectionDefense ? AnswerEngine.sanitizePassage(p.text) : p.text;
       const tokens = estimateTokens(text);
       if (used + tokens > budget) return;
       used += tokens;
@@ -185,8 +190,14 @@ export class AnswerEngine {
     const contradictions = AnswerEngine.detectContradictions(passages);
     const coverage = citations.length / Math.min(passages.length, 5);
 
-    metrics.answerTokens.inc({ model: generation.model, kind: 'prompt' }, generation.usage.promptTokens);
-    metrics.answerTokens.inc({ model: generation.model, kind: 'completion' }, generation.usage.completionTokens);
+    metrics.answerTokens.inc(
+      { model: generation.model, kind: 'prompt' },
+      generation.usage.promptTokens
+    );
+    metrics.answerTokens.inc(
+      { model: generation.model, kind: 'completion' },
+      generation.usage.completionTokens
+    );
 
     return {
       answer: generation.text,
@@ -275,8 +286,14 @@ export class AnswerEngine {
           contradictions.push({
             claim: `Sources disagree about whether the subject is ${posVal}`,
             sources: [
-              { citationId: posEntry.p.id, statement: extractSnippet(posEntry.p.text, posVal, 140) },
-              { citationId: negEntry.p.id, statement: extractSnippet(negEntry.p.text, negVal, 140) },
+              {
+                citationId: posEntry.p.id,
+                statement: extractSnippet(posEntry.p.text, posVal, 140),
+              },
+              {
+                citationId: negEntry.p.id,
+                statement: extractSnippet(negEntry.p.text, negVal, 140),
+              },
             ],
           });
           break;
