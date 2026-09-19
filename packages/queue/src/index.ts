@@ -81,8 +81,13 @@ export function createQueueEvents(name: QueueName, redisUrl: string): QueueEvent
   return new QueueEvents(name, { connection: createConnection(redisUrl), prefix: 'luma' });
 }
 
-export async function queueDepths(queues: Queue[]): Promise<Record<string, { waiting: number; active: number; failed: number; completed: number }>> {
-  const out: Record<string, { waiting: number; active: number; failed: number; completed: number }> = {};
+export async function queueDepths(
+  queues: Queue[]
+): Promise<Record<string, { waiting: number; active: number; failed: number; completed: number }>> {
+  const out: Record<
+    string,
+    { waiting: number; active: number; failed: number; completed: number }
+  > = {};
   await Promise.all(
     queues.map(async (q) => {
       const counts = await q.getJobCounts('waiting', 'active', 'failed', 'completed');
