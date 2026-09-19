@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @theme {
   --color-gray-50: #f9fafb;
@@ -15,6 +15,12 @@
 }
 
 @layer base {
-  html { @media (prefers-color-scheme: dark) { color-scheme: dark; } }
-  body { @apply bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 antialiased; }
+  html {
+    @media (prefers-color-scheme: dark) {
+      color-scheme: dark;
+    }
+  }
+  body {
+    @apply bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 antialiased;
+  }
 }
