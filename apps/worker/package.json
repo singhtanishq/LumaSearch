@@ -15,6 +15,8 @@
     "@luma-search/config": "workspace:*",
     "@luma-search/crawler-core": "workspace:*",
     "@luma-search/embeddings": "workspace:*",
+    "@luma-search/evidence": "workspace:*",
+    "@luma-search/llm": "workspace:*",
     "@luma-search/queue": "workspace:*",
     "@luma-search/search-client": "workspace:*",
     "@luma-search/storage": "workspace:*",
