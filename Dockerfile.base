@@ -1,7 +1,7 @@
 # Shared base image with dependencies and packages built.
 # Build from repo root: docker build -f Dockerfile.base -t luma-base .
-FROM node:20-slim AS base
-RUN apt-get update && apt-get install -y --no-install-recommends libssl3 openssl && rm -rf /var/lib/apt/lists/*
+FROM node:20-alpine AS base
+RUN apk add --no-cache libc6-compat libssl3
 RUN corepack enable
 WORKDIR /workspace
 
@@ -27,7 +27,7 @@ COPY packages/evidence/package.json packages/evidence/
 COPY packages/storage/package.json packages/storage/
 COPY packages/queue/package.json packages/queue/
 
-# Copy Prisma schema and config
+# Copy Prisma schema
 COPY packages/storage/prisma ./packages/storage/prisma
 
 # Install dependencies
