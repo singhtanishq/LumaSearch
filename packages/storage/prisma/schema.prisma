@@ -197,6 +197,7 @@ model CrawlTask {
   jobId        String
   documentId   String?       @unique
   url          String
+  finalUrl     String?
   depth        Int           @default(0)
   status       CrawlTaskStatus @default(pending)
   attempts     Int           @default(0)
