@@ -39,7 +39,9 @@ export class LocalEmbeddingProvider implements EmbeddingProvider {
   async embed(texts: string[]): Promise<number[][]> {
     const out: number[][] = [];
     for (let i = 0; i < texts.length; i += this.batchSize) {
-      const batch = texts.slice(i, i + this.batchSize).map((t) => (t.length > 8000 ? t.slice(0, 8000) : t));
+      const batch = texts
+        .slice(i, i + this.batchSize)
+        .map((t) => (t.length > 8000 ? t.slice(0, 8000) : t));
       const res = await withBackoff(
         async () => {
           const r = await fetch(`${this.url}/embed`, {
@@ -80,26 +82,35 @@ export class OpenAIEmbeddingProvider implements EmbeddingProvider {
   }
 
   estimateCostUsd(tokens: number): number {
-    return ((tokens / 1_000_000) * (this.cfg.costPerMillionTokens ?? 0.02));
+    return (tokens / 1_000_000) * (this.cfg.costPerMillionTokens ?? 0.02);
   }
 
   async embed(texts: string[]): Promise<number[][]> {
     const out: number[][] = [];
     for (let i = 0; i < texts.length; i += this.cfg.batchSize) {
-      const batch = texts.slice(i, i + this.cfg.batchSize).map((t) => (t.length > 8000 ? t.slice(0, 8000) : t));
-      const res = await withBackoff(async () => {
-        const r = await fetch('https://api.openai.com/v1/embeddings', {
-          method: 'POST',
-          headers: {
-            'content-type': 'application/json',
-            authorization: `Bearer ${this.cfg.apiKey}`,
-          },
-          body: JSON.stringify({ model: this.cfg.model, input: batch, dimensions: this.dimensions }),
-          signal: AbortSignal.timeout(60_000),
-        });
-        if (!r.ok) throw new Error(`openai embeddings HTTP ${r.status}`);
-        return r.json() as Promise<{ data: Array<{ embedding: number[]; index: number }> }>;
-      }, { attempts: 3, initialMs: 1000 });
+      const batch = texts
+        .slice(i, i + this.cfg.batchSize)
+        .map((t) => (t.length > 8000 ? t.slice(0, 8000) : t));
+      const res = await withBackoff(
+        async () => {
+          const r = await fetch('https://api.openai.com/v1/embeddings', {
+            method: 'POST',
+            headers: {
+              'content-type': 'application/json',
+              authorization: `Bearer ${this.cfg.apiKey}`,
+            },
+            body: JSON.stringify({
+              model: this.cfg.model,
+              input: batch,
+              dimensions: this.dimensions,
+            }),
+            signal: AbortSignal.timeout(60_000),
+          });
+          if (!r.ok) throw new Error(`openai embeddings HTTP ${r.status}`);
+          return r.json() as Promise<{ data: Array<{ embedding: number[]; index: number }> }>;
+        },
+        { attempts: 3, initialMs: 1000 }
+      );
       const sorted = [...res.data].sort((a, b) => a.index - b.index);
       out.push(...sorted.map((d) => d.embedding));
     }
