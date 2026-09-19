@@ -56,8 +56,8 @@ describe('Text utilities', () => {
     });
 
     it('decodes entities', () => {
-      const input = '<p>& < > " '</p>';
-      expect(stripHtml(input)).toBe('& < > " \'');
+      const input = '<p>< > & " '</p>';
+      expect(stripHtml(input)).toBe('< > & " \'');
     });
   });
 
