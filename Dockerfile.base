@@ -39,11 +39,8 @@ COPY . .
 # Generate Prisma client
 RUN ./packages/storage/node_modules/.bin/prisma generate --schema=./packages/storage/prisma/schema.prisma
 
-# Debug: check where .prisma was created
-RUN find /workspace -name '.prisma' -type d 2>/dev/null && ls -la /workspace/node_modules/.prisma 2>/dev/null || echo "NOT FOUND"
-
-# Copy generated .prisma folder to root for app images
-RUN cp -rL /workspace/node_modules/.prisma /workspace/.prisma-app
+# Copy generated .prisma folder from pnpm store to root for app images
+RUN cp -rL /workspace/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/.prisma /workspace/.prisma-app
 
 # Build packages
 RUN pnpm --filter './packages/**' build
