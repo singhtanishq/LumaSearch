@@ -102,7 +102,7 @@ services:
   embeddings:
     build:
       context: .
-      dockerfile: infra/docker/Dockerfile.embeddings
+      dockerfile: Dockerfile.embeddings
     restart: unless-stopped
     ports:
       - '8000:8000'
