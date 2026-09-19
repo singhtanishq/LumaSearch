@@ -73,10 +73,10 @@ export function chunkText(text: string, options: ChunkOptions = {}): string[] {
 
 function splitLongParagraph(text: string, opts: Required<ChunkOptions>): string[] {
   const chunks: string[] = [];
-  
+
   // Try to split by sentence boundaries
   const sentences = text.split(/(?<=[.!?。！？])\s+/).filter(Boolean);
-  
+
   // If no sentence boundaries found, fall back to word-based chunking
   if (sentences.length <= 1) {
     return chunkByWords(text, opts);
@@ -215,11 +215,11 @@ export function extractSnippet(content: string, query: string, maxLength = 160):
     }
   }
   if (bestPos < 0 && bestScore === 0) return truncate(content, maxLength);
-  
+
   // Extend window to include full matched terms
   const start = Math.max(0, bestPos - 20);
   let end = bestPos + maxLength + 20;
-  
+
   // Extend end to include any matched terms that cross the boundary
   for (const term of terms) {
     const termIdx = lower.indexOf(term, bestPos);
@@ -227,10 +227,10 @@ export function extractSnippet(content: string, query: string, maxLength = 160):
       end = termIdx + term.length;
     }
   }
-  
+
   const snippet = content.slice(start, end);
   const prefix = start > 0 ? '…' : '';
-  
+
   // Use a special truncate that preserves matched terms
   return prefix + truncatePreservingTerms(snippet, maxLength, terms, lower.slice(start, end));
 }
@@ -238,9 +238,14 @@ export function extractSnippet(content: string, query: string, maxLength = 160):
 /**
  * Truncate text while preserving specified terms.
  */
-function truncatePreservingTerms(text: string, maxLength: number, terms: string[], lower: string): string {
+function truncatePreservingTerms(
+  text: string,
+  maxLength: number,
+  terms: string[],
+  lower: string
+): string {
   if (text.length <= maxLength) return text;
-  
+
   // Find positions of all terms in the text
   const termPositions: Array<{ start: number; end: number }> = [];
   for (const term of terms) {
@@ -250,17 +255,17 @@ function truncatePreservingTerms(text: string, maxLength: number, terms: string[
       idx = lower.indexOf(term, idx + term.length);
     }
   }
-  
+
   // If no terms found, use normal truncate
   if (termPositions.length === 0) return truncate(text, maxLength);
-  
+
   // Sort by position
   termPositions.sort((a, b) => a.start - b.start);
-  
+
   // Find a window of maxLength that includes the most terms
   // Try windows starting at each term position
   let bestWindow = { start: 0, end: maxLength, score: 0 };
-  
+
   for (const tp of termPositions) {
     // Try window that starts at tp.start and includes maxLength chars
     const windowStart = Math.max(0, tp.start - 20); // Some context before
@@ -268,26 +273,26 @@ function truncatePreservingTerms(text: string, maxLength: number, terms: string[
     if (windowEnd - windowStart < maxLength && windowStart > 0) {
       // Extend left if possible
       const extendedStart = Math.max(0, windowEnd - maxLength);
-      
+
       // Count how many terms are in this window
       let score = 0;
       for (const tp2 of termPositions) {
         if (tp2.start >= extendedStart && tp2.end <= windowEnd) score++;
       }
-      
+
       if (score > bestWindow.score) {
         bestWindow = { start: extendedStart, end: windowEnd, score };
       }
     }
   }
-  
+
   // If no good window found, use first term
   if (bestWindow.score === 0 && termPositions.length > 0) {
     const firstTp = termPositions[0]!;
     bestWindow.start = Math.max(0, firstTp.start - 20);
     bestWindow.end = Math.min(text.length, bestWindow.start + maxLength);
   }
-  
+
   const finalText = text.slice(bestWindow.start, bestWindow.end);
   const prefix = bestWindow.start > 0 ? '…' : '';
   return prefix + truncate(finalText, maxLength);
