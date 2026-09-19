@@ -13,7 +13,15 @@ interface SearchResultsProps {
   hasMore: boolean;
 }
 
-export default function SearchResults({ results, loading, total, took, query, onLoadMore, hasMore }: SearchResultsProps) {
+export default function SearchResults({
+  results,
+  loading,
+  total,
+  took,
+  query,
+  onLoadMore,
+  hasMore,
+}: SearchResultsProps) {
   const [expanded, setExpanded] = useState<string | null>(null);
 
   if (!results.length && !loading) return null;
@@ -21,8 +29,12 @@ export default function SearchResults({ results, loading, total, took, query, on
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-4">
-        <span>{total.toLocaleString()} results in {took}ms</span>
-        <span className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-800 rounded">query: "{query}"</span>
+        <span>
+          {total.toLocaleString()} results in {took}ms
+        </span>
+        <span className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-800 rounded">
+          query: "{query}"
+        </span>
       </div>
 
       {results.map((result) => (
@@ -48,7 +60,15 @@ export default function SearchResults({ results, loading, total, took, query, on
   );
 }
 
-function ResultCard({ result, isExpanded, onToggle }: { result: SearchResult; isExpanded: boolean; onToggle: () => void }) {
+function ResultCard({
+  result,
+  isExpanded,
+  onToggle,
+}: {
+  result: SearchResult;
+  isExpanded: boolean;
+  onToggle: () => void;
+}) {
   const displayUrl = result.canonicalUrl || result.url;
   const domain = new URL(displayUrl).hostname.replace('www.', '');
 
@@ -73,35 +93,58 @@ function ResultCard({ result, isExpanded, onToggle }: { result: SearchResult; is
             </span>
           </div>
           <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-            <a href={displayUrl} target="_blank" rel="noopener noreferrer" className="hover:underline">
+            <a
+              href={displayUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:underline"
+            >
               {domain}
             </a>
             {result.publishedAt && (
-              <> · <time dateTime={result.publishedAt}>{new Date(result.publishedAt).toLocaleDateString()}</time></>
+              <>
+                {' '}
+                ·{' '}
+                <time dateTime={result.publishedAt}>
+                  {new Date(result.publishedAt).toLocaleDateString()}
+                </time>
+              </>
             )}
             {result.crawledAt && (
-              <> · crawled <time dateTime={result.crawledAt}>{new Date(result.crawledAt).toLocaleDateString()}</time></>
+              <>
+                {' '}
+                · crawled{' '}
+                <time dateTime={result.crawledAt}>
+                  {new Date(result.crawledAt).toLocaleDateString()}
+                </time>
+              </>
             )}
           </div>
           <p className="text-gray-700 dark:text-gray-300 line-clamp-3 mb-2">
-            {result.highlights?.flatMap(h => h.fragments).join(' … ') || result.snippet}
+            {result.highlights?.flatMap((h) => h.fragments).join(' … ') || result.snippet}
           </p>
           {isExpanded && (
             <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-800 text-sm space-y-1">
               <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
                 <span>ID:</span>
-                <code className="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-xs font-mono">{result.id}</code>
+                <code className="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-xs font-mono">
+                  {result.id}
+                </code>
               </div>
               {result.language && (
                 <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
                   <span>Language:</span>
-                  <code className="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-xs">{result.language}</code>
+                  <code className="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-xs">
+                    {result.language}
+                  </code>
                 </div>
               )}
               {result.score && (
                 <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
                   <span>Score:</span>
-                  <code className="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-xs">{result.score.toFixed(3)}</code>
+                  <code className="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-xs">
+                    {result.score.toFixed(3)}
+                  </code>
                 </div>
               )}
             </div>
@@ -112,7 +155,12 @@ function ResultCard({ result, isExpanded, onToggle }: { result: SearchResult; is
           className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded"
           aria-label={isExpanded ? 'Collapse' : 'Expand'}
         >
-          <svg className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg
+            className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
         </button>
