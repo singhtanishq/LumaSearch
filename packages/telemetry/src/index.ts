@@ -53,7 +53,6 @@ export function newCorrelationId(): string {
 
 // ─── Metrics ────────────────────────────────────────────────────────────────
 
-let metricsInitialized = false;
 let cachedMetrics: Metrics | null = null;
 
 export interface Metrics {
