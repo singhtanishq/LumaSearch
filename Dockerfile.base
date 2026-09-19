@@ -27,10 +27,13 @@ COPY packages/evidence/package.json packages/evidence/
 COPY packages/storage/package.json packages/storage/
 COPY packages/queue/package.json packages/queue/
 
+# Copy Prisma schema
+COPY packages/storage/prisma ./packages/storage/prisma
+
 # Install dependencies
 RUN pnpm install --frozen-lockfile || pnpm install
 
-# Generate Prisma client with proper binary target for OpenSSL 3
+# Generate Prisma client
 RUN npx prisma generate --schema=./packages/storage/prisma/schema.prisma
 
 # Copy sources and build packages
