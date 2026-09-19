@@ -84,7 +84,7 @@ services:
   worker:
     build:
       context: .
-      dockerfile: infra/docker/Dockerfile.worker
+      dockerfile: Dockerfile.worker
     restart: unless-stopped
     environment:
       <<: *common-env
