@@ -270,7 +270,6 @@ function truncatePreservingTerms(text: string, maxLength: number, terms: string[
     if (windowEnd - windowStart < maxLength && windowStart > 0) {
       // Extend left if possible
       const extendedStart = Math.max(0, windowEnd - maxLength);
-      const windowText = text.slice(extendedStart, windowEnd);
       
       // Count how many terms are in this window
       let score = 0;
@@ -286,14 +285,14 @@ function truncatePreservingTerms(text: string, maxLength: number, terms: string[
   
   // If no good window found, use first term
   if (bestWindow.score === 0 && termPositions.length > 0) {
-    const tp = termPositions[0];
-    bestWindow.start = Math.max(0, tp.start - 20);
+    const firstTp = termPositions[0];
+    bestWindow.start = Math.max(0, firstTp.start - 20);
     bestWindow.end = Math.min(text.length, bestWindow.start + maxLength);
   }
   
-  const windowText = text.slice(bestWindow.start, bestWindow.end);
+  const finalText = text.slice(bestWindow.start, bestWindow.end);
   const prefix = bestWindow.start > 0 ? '…' : '';
-  return prefix + truncate(windowText, maxLength);
+  return prefix + truncate(finalText, maxLength);
 }
 
 /**
