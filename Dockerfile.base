@@ -36,10 +36,13 @@ COPY packages/storage/prisma ./packages/storage/prisma
 # Copy sources
 COPY . .
 
-# Generate Prisma client (use local prisma from storage package's node_modules)
+# Generate Prisma client
 RUN ./packages/storage/node_modules/.bin/prisma generate --schema=./packages/storage/prisma/schema.prisma
 
-# Copy generated .prisma folder to root for app images (before building packages)
+# Debug: check where .prisma was created
+RUN find /workspace -name '.prisma' -type d 2>/dev/null && ls -la /workspace/node_modules/.prisma 2>/dev/null || echo "NOT FOUND"
+
+# Copy generated .prisma folder to root for app images
 RUN cp -rL /workspace/node_modules/.prisma /workspace/.prisma-app
 
 # Build packages
