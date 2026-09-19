@@ -1,7 +1,7 @@
 # Shared base image with dependencies and packages built.
 # Build from repo root: docker build -f Dockerfile.base -t luma-base .
-FROM node:20-alpine AS base
-RUN apk add --no-cache libc6-compat libssl3
+FROM node:20-slim AS base
+RUN apt-get update && apt-get install -y --no-install-recommends libssl3 && rm -rf /var/lib/apt/lists/*
 RUN corepack enable
 WORKDIR /workspace
 
@@ -36,11 +36,11 @@ COPY packages/storage/prisma ./packages/storage/prisma
 # Copy sources
 COPY . .
 
-# Generate Prisma client
+# Generate Prisma client (use local prisma from storage package's node_modules)
 RUN ./packages/storage/node_modules/.bin/prisma generate --schema=./packages/storage/prisma/schema.prisma
 
-# Copy generated .prisma folder from pnpm store to root for app images
-RUN cp -rL /workspace/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/.prisma /workspace/.prisma-app
+# Copy generated .prisma folder to root for app images
+RUN cp -rL /workspace/node_modules/.prisma /workspace/.prisma-app
 
 # Build packages
 RUN pnpm --filter './packages/**' build
