@@ -30,17 +30,15 @@ COPY packages/queue/package.json packages/queue/
 # Install dependencies
 RUN pnpm install --frozen-lockfile || pnpm install
 
-# Copy sources
-COPY . .
-
 # Copy Prisma schema
 COPY packages/storage/prisma ./packages/storage/prisma
 
 # Generate Prisma client (use local prisma from storage package's node_modules)
 RUN ./packages/storage/node_modules/.bin/prisma generate --schema=./packages/storage/prisma/schema.prisma
 
-# Copy generated .prisma folder to root for app images (use -L to follow symlink)
+# Copy generated .prisma folder to root for app images (before copying sources)
 RUN cp -rL /workspace/node_modules/.prisma /workspace/.prisma-app
 
-# Build packages
+# Copy sources and build packages
+COPY . .
 RUN pnpm --filter './packages/**' build
