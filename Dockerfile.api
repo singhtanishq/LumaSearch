@@ -1,7 +1,5 @@
 FROM luma-base AS api
-WORKDIR /workspace
-# Generate Prisma client at workspace root
-RUN /workspace/packages/storage/node_modules/.bin/prisma generate --schema=/workspace/packages/storage/prisma/schema.prisma
 WORKDIR /workspace/apps/api
+RUN /workspace/packages/storage/node_modules/.bin/prisma generate --schema=/workspace/packages/storage/prisma/schema.prisma
 EXPOSE 4000
 CMD ["pnpm", "start"]
