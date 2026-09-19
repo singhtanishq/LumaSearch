@@ -1,19 +1,41 @@
 /**
  * LumaSearch API Server - Fastify with search, answer, crawl, and health endpoints
  */
-import Fastify, { FastifyInstance, RawServerDefault, RawRequestDefaultExpression, RawReplyDefaultExpression } from 'fastify';
+import Fastify, {
+  FastifyInstance,
+  RawServerDefault,
+  RawRequestDefaultExpression,
+  RawReplyDefaultExpression,
+} from 'fastify';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
-import { validateEnv, validateEnvPartial, searchEnvSchema, llmEnvSchema, queueEnvSchema } from '@luma-search/config';
+import {
+  validateEnv,
+  validateEnvPartial,
+  searchEnvSchema,
+  llmEnvSchema,
+  queueEnvSchema,
+} from '@luma-search/config';
 import { createLogger, initMetrics, runHealthChecks, HealthCheck } from '@luma-search/telemetry';
-import { createSearchClient, checkSearchHealth, IndexManager, buildHybridBody, buildLexicalBody } from '@luma-search/search-client';
+import {
+  createSearchClient,
+  checkSearchHealth,
+  IndexManager,
+  buildHybridBody,
+  buildLexicalBody,
+} from '@luma-search/search-client';
 import { createPrismaClient, checkDbHealth } from '@luma-search/storage';
 import { createLLMProvider } from '@luma-search/llm';
 import { AnswerEngine } from '@luma-search/evidence';
 import { interpretQuery, filtersFromOperators } from '@luma-search/query';
 import { canonicalizeUrl } from '@luma-search/utils';
-import type { SearchResponse, SearchFilters, RankingProfile, LLMProviderKind } from '@luma-search/types';
+import type {
+  SearchResponse,
+  SearchFilters,
+  RankingProfile,
+  LLMProviderKind,
+} from '@luma-search/types';
 
 const log = createLogger({ service: 'api' });
 const metrics = initMetrics();
@@ -45,8 +67,18 @@ const indexManager = new IndexManager(es, {
 const prisma = createPrismaClient();
 const llm = createLLMProvider({
   provider: llmEnv.LLM_PROVIDER as LLMProviderKind,
-  openai: { apiKey: llmEnv.OPENAI_API_KEY, model: llmEnv.OPENAI_CHAT_MODEL, maxTokens: llmEnv.OPENAI_MAX_TOKENS, temperature: llmEnv.OPENAI_TEMPERATURE },
-  anthropic: { apiKey: llmEnv.ANTHROPIC_API_KEY, model: llmEnv.ANTHROPIC_CHAT_MODEL, maxTokens: llmEnv.ANTHROPIC_MAX_TOKENS, temperature: llmEnv.ANTHROPIC_TEMPERATURE },
+  openai: {
+    apiKey: llmEnv.OPENAI_API_KEY,
+    model: llmEnv.OPENAI_CHAT_MODEL,
+    maxTokens: llmEnv.OPENAI_MAX_TOKENS,
+    temperature: llmEnv.OPENAI_TEMPERATURE,
+  },
+  anthropic: {
+    apiKey: llmEnv.ANTHROPIC_API_KEY,
+    model: llmEnv.ANTHROPIC_CHAT_MODEL,
+    maxTokens: llmEnv.ANTHROPIC_MAX_TOKENS,
+    temperature: llmEnv.ANTHROPIC_TEMPERATURE,
+  },
   ollama: { url: llmEnv.OLLAMA_URL, model: llmEnv.OLLAMA_CHAT_MODEL },
 });
 
@@ -60,7 +92,9 @@ const answerEngine = new AnswerEngine(es as any, llm, {
 
 // ─── Server setup ───────────────────────────────────────────────────────────
 
-async function buildServer(): Promise<FastifyInstance<RawServerDefault, RawRequestDefaultExpression, RawReplyDefaultExpression>> {
+async function buildServer(): Promise<
+  FastifyInstance<RawServerDefault, RawRequestDefaultExpression, RawReplyDefaultExpression>
+> {
   const server = Fastify<RawServerDefault, RawRequestDefaultExpression, RawReplyDefaultExpression>({
     logger: log,
     bodyLimit: 1024 * 1024, // 1MB
@@ -95,7 +129,15 @@ async function buildServer(): Promise<FastifyInstance<RawServerDefault, RawReque
   const healthChecks: HealthCheck[] = [
     { name: 'database', check: () => checkDbHealth(prisma) },
     { name: 'elasticsearch', check: () => checkSearchHealth(es) },
-    { name: 'memory', check: () => Promise.resolve({ status: process.memoryUsage().heapUsed < 1.5e9 ? 'ok' : 'down', latencyMs: 0, detail: `${Math.round(process.memoryUsage().heapUsed / 1e6)}MB` }) },
+    {
+      name: 'memory',
+      check: () =>
+        Promise.resolve({
+          status: process.memoryUsage().heapUsed < 1.5e9 ? 'ok' : 'down',
+          latencyMs: 0,
+          detail: `${Math.round(process.memoryUsage().heapUsed / 1e6)}MB`,
+        }),
+    },
   ];
 
   server.get('/health/live', async () => ({ status: 'ok' }));
@@ -121,7 +163,14 @@ async function buildServer(): Promise<FastifyInstance<RawServerDefault, RawReque
     };
   }>('/api/v1/search', async (req, reply) => {
     const started = Date.now();
-    const { q, profile = 'hybrid', filters = {}, limit = _searchEnv.SEARCH_DEFAULT_LIMIT, offset = 0, debug } = req.body;
+    const {
+      q,
+      profile = 'hybrid',
+      filters = {},
+      limit = _searchEnv.SEARCH_DEFAULT_LIMIT,
+      offset = 0,
+      debug,
+    } = req.body;
 
     if (!q || q.trim().length === 0) {
       return reply.code(400).send({ error: 'Query parameter "q" is required' });
@@ -173,7 +222,9 @@ async function buildServer(): Promise<FastifyInstance<RawServerDefault, RawReque
         publishedAt: src.publishedAt ? String(src.publishedAt) : undefined,
         crawledAt: src.crawledAt ? String(src.crawledAt) : new Date().toISOString(),
         score: hit._score ?? 0,
-        highlights: hit.highlight ? Object.entries(hit.highlight).map(([field, fragments]) => ({ field, fragments })) : undefined,
+        highlights: hit.highlight
+          ? Object.entries(hit.highlight).map(([field, fragments]) => ({ field, fragments }))
+          : undefined,
         source: 'local-index' as const,
       };
     });
@@ -182,7 +233,12 @@ async function buildServer(): Promise<FastifyInstance<RawServerDefault, RawReque
       query: q,
       interpretation,
       results,
-      total: typeof res.hits?.total === 'object' && res.hits?.total?.value ? res.hits.total.value : (typeof res.hits?.total === 'number' ? res.hits.total : hits.length),
+      total:
+        typeof res.hits?.total === 'object' && res.hits?.total?.value
+          ? res.hits.total.value
+          : typeof res.hits?.total === 'number'
+            ? res.hits.total
+            : hits.length,
       took: Date.now() - started,
       profile,
     };
@@ -208,7 +264,9 @@ async function buildServer(): Promise<FastifyInstance<RawServerDefault, RawReque
     };
   }>('/api/v1/answer', async (req, reply) => {
     if (llmEnv.LLM_PROVIDER === 'disabled') {
-      return reply.code(503).send({ error: 'AI answer generation is disabled. Set LLM_PROVIDER to enable.' });
+      return reply
+        .code(503)
+        .send({ error: 'AI answer generation is disabled. Set LLM_PROVIDER to enable.' });
     }
 
     const { q, profile = 'research', filters = {}, mode = 'answer' } = req.body;
@@ -307,16 +365,24 @@ main();
 // Utility: extract snippet from text
 function extractSnippet(text: string, query: string, maxLength = 160): string {
   if (!query) return text.slice(0, maxLength) + (text.length > maxLength ? '…' : '');
-  const terms = query.toLowerCase().split(/\s+/).filter((t) => t.length > 2);
+  const terms = query
+    .toLowerCase()
+    .split(/\s+/)
+    .filter((t) => t.length > 2);
   const lower = text.toLowerCase();
-  let bestPos = -1, bestScore = 0;
+  let bestPos = -1,
+    bestScore = 0;
   const step = Math.max(1, Math.floor((text.length - maxLength) / 20) || 1);
   for (let pos = 0; pos < Math.max(1, text.length - maxLength); pos += step) {
     const window = lower.slice(pos, pos + maxLength);
     const score = terms.reduce((acc, t) => acc + (window.includes(t) ? 1 : 0), 0);
-    if (score > bestScore) { bestScore = score; bestPos = pos; }
+    if (score > bestScore) {
+      bestScore = score;
+      bestPos = pos;
+    }
   }
-  if (bestPos <= 0 && bestScore === 0) return text.slice(0, maxLength) + (text.length > maxLength ? '…' : '');
+  if (bestPos <= 0 && bestScore === 0)
+    return text.slice(0, maxLength) + (text.length > maxLength ? '…' : '');
   const start = Math.max(0, bestPos - 20);
   return (start > 0 ? '…' : '') + text.slice(start, start + maxLength + 20);
 }
