@@ -17,17 +17,21 @@ http://localhost:4000/api/v1
 ### Health
 
 #### GET `/health/live`
+
 Liveness probe - always returns 200 if process is running.
 
 **Response:**
+
 ```json
 { "status": "ok" }
 ```
 
 #### GET `/health/ready`
+
 Readiness probe - checks dependencies.
 
 **Response:**
+
 ```json
 {
   "status": "ok",
@@ -48,6 +52,7 @@ Readiness probe - checks dependencies.
 Execute a search query.
 
 **Request:**
+
 ```json
 {
   "q": "typescript tutorial site:github.com",
@@ -65,6 +70,7 @@ Execute a search query.
 ```
 
 **Response:**
+
 ```json
 {
   "query": "typescript tutorial site:github.com",
@@ -124,6 +130,7 @@ Execute a search query.
 Generate an AI answer with citations from search evidence.
 
 **Request:**
+
 ```json
 {
   "q": "What is TypeScript?",
@@ -134,6 +141,7 @@ Generate an AI answer with citations from search evidence.
 ```
 
 **Response:**
+
 ```json
 {
   "answer": "TypeScript is a strongly typed programming language that builds on JavaScript, adding static type definitions... [1][2]",
@@ -164,6 +172,7 @@ Generate an AI answer with citations from search evidence.
 Create a new crawl job.
 
 **Request:**
+
 ```json
 {
   "seeds": ["https://example.com", "https://docs.example.com"],
@@ -174,6 +183,7 @@ Create a new crawl job.
 ```
 
 **Response:**
+
 ```json
 {
   "jobId": "cm8x7y2z9",
@@ -186,6 +196,7 @@ Create a new crawl job.
 Get crawl job status.
 
 **Response:**
+
 ```json
 {
   "id": "cm8x7y2z9",
@@ -214,6 +225,7 @@ Get crawl job status.
 Get index statistics for all verticals.
 
 **Response:**
+
 ```json
 {
   "web": {
@@ -236,25 +248,24 @@ Get index statistics for all verticals.
 
 ## Rate Limits
 
-| Endpoint | Limit | Window |
-|----------|-------|--------|
-| `/search` | 30 req | 60s |
-| `/answer` | 10 req | 60s |
-| `/crawl/jobs` | 5 req | 60s |
-| Auth endpoints | 5 req | 60s |
+| Endpoint       | Limit  | Window |
+| -------------- | ------ | ------ |
+| `/search`      | 30 req | 60s    |
+| `/answer`      | 10 req | 60s    |
+| `/crawl/jobs`  | 5 req  | 60s    |
+| Auth endpoints | 5 req  | 60s    |
 
 ## Error Responses
 
 ```json
 {
   "error": "Invalid query",
-  "details": [
-    { "field": "q", "message": "Query is required" }
-  ]
+  "details": [{ "field": "q", "message": "Query is required" }]
 }
 ```
 
 HTTP Status Codes:
+
 - `200` - Success
 - `400` - Bad Request (validation error)
 - `401` - Unauthorized
