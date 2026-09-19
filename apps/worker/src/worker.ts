@@ -327,11 +327,11 @@ async function processEmbedGenerate(job: { data: EmbedJobData }) {
         where: { id: chunkIds[i] },
         data: { embedded: true },
       });
-    }
+}
 
-    // Update Elasticsearch with embeddings
+// Update Elasticsearch with embeddings
     for (let i = 0; i < chunkIds.length; i++) {
-      await es.update({
+      await (es as any).update({
         index: 'luma_web',
         id: chunkIds[i],
         doc: { embedding: embeddings[i] },
