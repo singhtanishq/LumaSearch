@@ -3,9 +3,9 @@
  * Runs BullMQ workers for: crawl:fetch, crawl:parse, index:ingest, embed:generate, answer:generate
  */
 import { createLogger, initMetrics } from '@luma-search/telemetry';
-import { validateEnv, CrawlerEnv, LLMEnv, SearchEnv, TelemetryEnv } from '@luma-search/config';
+import { validateEnv, CrawlerEnv, LLMEnv } from '@luma-search/config';
 import { createConnection, createWorker, QUEUE_NAMES, type CrawlFetchJobData, type IngestJobData, type EmbedJobData, type AnswerJobData } from '@luma-search/queue';
-import { crawlOrchestrator, createFetcher, parseHtml } from '@luma-search/crawler-core';
+import { createFetcher, parseHtml } from '@luma-search/crawler-core';
 import { createSearchClient, IndexManager } from '@luma-search/search-client';
 import { createEmbeddingProvider } from '@luma-search/embeddings';
 import { createLLMProvider } from '@luma-search/llm';
