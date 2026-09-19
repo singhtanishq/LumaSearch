@@ -1,7 +1,7 @@
 # Shared base image with dependencies and packages built.
 # Build from repo root: docker build -f Dockerfile.base -t luma-base .
 FROM node:20-slim AS base
-RUN apt-get update && apt-get install -y --no-install-recommends libssl1.1 && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends libssl3 && rm -rf /var/lib/apt/lists/*
 RUN corepack enable
 WORKDIR /workspace
 
@@ -27,8 +27,11 @@ COPY packages/evidence/package.json packages/evidence/
 COPY packages/storage/package.json packages/storage/
 COPY packages/queue/package.json packages/queue/
 
-# Install dependencies
+# Install dependencies with Prisma binary targets for Linux ARM64
 RUN pnpm install --frozen-lockfile || pnpm install
+
+# Generate Prisma client with proper binary target for OpenSSL 3
+RUN npx prisma generate --schema=./packages/storage/prisma/schema.prisma --binary-targets=linux-arm64-openssl-3.0.2
 
 # Copy sources and build packages
 COPY . .
