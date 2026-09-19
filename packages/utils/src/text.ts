@@ -230,7 +230,46 @@ export function extractSnippet(content: string, query: string, maxLength = 160):
   
   const snippet = content.slice(start, end);
   const prefix = start > 0 ? '…' : '';
-  return prefix + truncate(snippet, maxLength);
+  
+  // Use a special truncate that preserves matched terms
+  return prefix + truncatePreservingTerms(snippet, maxLength, terms, lower.slice(start, end));
+}
+
+/**
+ * Truncate text while preserving specified terms.
+ */
+function truncatePreservingTerms(text: string, maxLength: number, terms: string[], lower: string): string {
+  if (text.length <= maxLength) return text;
+  
+  // Find positions of all terms in the text
+  const termPositions: Array<{ start: number; end: number }> = [];
+  for (const term of terms) {
+    let idx = 0;
+    while (true) {
+      idx = lower.indexOf(term, idx);
+      if (idx === -1) break;
+      termPositions.push({ start: idx, end: idx + term.length });
+      idx += term.length;
+    }
+  }
+  
+  // If no terms found, use normal truncate
+  if (termPositions.length === 0) return truncate(text, maxLength);
+  
+  // Find the best window of maxLength that includes at least one term
+  // Start with the earliest term that fits
+  for (const tp of termPositions) {
+    const windowStart = Math.max(0, tp.end - maxLength);
+    const windowEnd = Math.min(text.length, windowStart + maxLength);
+    const windowText = text.slice(windowStart, windowEnd);
+    if (windowText.length >= tp.end - tp.start) {
+      const prefix = windowStart > 0 ? '…' : '';
+      return prefix + truncate(windowText, maxLength);
+    }
+  }
+  
+  // Fallback: return the first maxLength chars
+  return truncate(text, maxLength);
 }
 
 /**
