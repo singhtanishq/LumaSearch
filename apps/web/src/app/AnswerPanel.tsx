@@ -1,6 +1,6 @@
 'use client';
 
-import { AnswerResponse } from './page';
+import { AnswerResponse } from '../types';
 
 interface AnswerPanelProps {
   answer: AnswerResponse | null;
@@ -99,7 +99,7 @@ export default function AnswerPanel({ answer, loading, query, onClose }: AnswerP
                     <div key={i} className="text-sm text-amber-700 dark:text-amber-300">
                       <p className="font-medium">{c.claim}</p>
                       <ul className="list-disc list-inside mt-1 space-y-1">
-                        {c.sources.map((s, j) => (
+                        {c.sources.map((s: { citationId: string; statement: string }, j) => (
                           <li key={j}>[{s.citationId}] {s.statement}</li>
                         ))}
                       </ul>
