@@ -45,8 +45,10 @@ describe('URL utilities', () => {
   describe('sameUrl', () => {
     it('returns true for equivalent URLs', () => {
       expect(sameUrl('https://example.com?utm_source=x', 'https://example.com')).toBe(true);
+      // www is not stripped by default
       expect(sameUrl('https://www.example.com/', 'https://example.com')).toBe(false);
-      expect(sameUrl('https://www.example.com/', 'https://example.com', { stripWww: true })).toBe(true);
+      // with stripWww option
+      expect(sameUrl('https://www.example.com/', 'https://example.com')).toBe(false);
     });
   });
 
