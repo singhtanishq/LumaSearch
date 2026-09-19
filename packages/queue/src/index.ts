@@ -112,7 +112,7 @@ export interface CrawlFetchJobData {
 
 export interface IngestJobData {
   url: string;
-  finalUrl?: string;
+  finalUrl: string;
   statusCode: number;
   contentType?: string;
   html: string;
