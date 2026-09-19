@@ -160,7 +160,8 @@ async function processCrawlFetch(job: { data: CrawlFetchJobData }) {
 }
 
 async function processCrawlParse(job: { data: IngestJobData & { depth: number; maxDepth: number; maxPages: number; includePatterns?: string[]; excludePatterns?: string[]; respectRobots: boolean } }) {
-  const { jobId, url, finalUrl, html, contentType: _contentType, depth, maxDepth: _maxDepth, maxPages: _maxPages, includePatterns: _includePatterns, excludePatterns: _excludePatterns, respectRobots: _respectRobots } = job.data;
+  const { jobId, url, finalUrl: finalUrlFromJob, html, contentType: _contentType, depth, maxDepth: _maxDepth, maxPages: _maxPages, includePatterns: _includePatterns, excludePatterns: _excludePatterns, respectRobots: _respectRobots } = job.data;
+  const finalUrl = finalUrlFromJob ?? url;
   log.info({ jobId, url, depth }, 'Processing crawl parse');
 
   try {
