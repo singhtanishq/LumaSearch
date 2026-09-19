@@ -1,4 +1,4 @@
 FROM luma-base AS worker
 WORKDIR /workspace/apps/worker
-RUN cp -r /workspace/.prisma-app .prisma
+RUN cp -r /workspace/.prisma-app /workspace/node_modules/.prisma
 CMD ["pnpm", "start"]
