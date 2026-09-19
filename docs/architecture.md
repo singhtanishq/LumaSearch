@@ -2,7 +2,8 @@
 
 ## Overview
 
-LumaSearch is a modular, self-hostable search platform built as a TypeScript monorepo with a clear separation of concerns across packages and services.
+LumaSearch is a modular, self-hostable search platform built as a TypeScript monorepo with a clear separation of
+concerns across packages and services.
 
 ## High-Level Architecture
 
@@ -37,26 +38,27 @@ LumaSearch is a modular, self-hostable search platform built as a TypeScript mon
 
 ## Package Structure
 
-| Package | Purpose | Key Exports |
-|---------|---------|-------------|
-| `@luma-search/config` | Zod-validated environment schemas | `validateEnv`, `*Env` types |
-| `@luma-search/types` | Shared TypeScript types | `Document`, `SearchResult`, `AnswerResponse`, etc. |
-| `@luma-search/utils` | URL canon, hashing, text chunking | `canonicalizeUrl`, `simhash`, `chunkText` |
-| `@luma-search/telemetry` | Pino logging, Prometheus metrics | `createLogger`, `initMetrics`, `runHealthChecks` |
-| `@luma-search/storage` | Prisma client + DB models | `getPrismaClient`, Prisma models |
-| `@luma-search/queue` | BullMQ queue definitions | `createWorker`, `createQueue`, job types |
-| `@luma-search/search-client` | ES client, index mgmt, hybrid search | `createSearchClient`, `IndexManager`, `buildHybridBody` |
-| `@luma-search/crawler-core` | Fetcher, parser, trap detection | `createFetcher`, `parseHtml`, `crawlOrchestrator` |
-| `@luma-search/embeddings` | Embedding provider adapters | `LocalEmbeddingProvider`, `OpenAIEmbeddingProvider` |
-| `@luma-search/llm` | LLM provider adapters | `OpenAIChatProvider`, `AnthropicChatProvider`, `OllamaChatProvider` |
-| `@luma-search/query` | Query parsing, intent detection | `parseOperators`, `interpretQuery` |
-| `@luma-search/evidence` | Answer synthesis with citations | `AnswerEngine` |
-| `@luma-search/ranking` | Ranking profiles, signals | (future) |
-| `@luma-search/auth` | Auth adapters | (future) |
+| Package                      | Purpose                              | Key Exports                                                         |
+| ---------------------------- | ------------------------------------ | ------------------------------------------------------------------- |
+| `@luma-search/config`        | Zod-validated environment schemas    | `validateEnv`, `*Env` types                                         |
+| `@luma-search/types`         | Shared TypeScript types              | `Document`, `SearchResult`, `AnswerResponse`, etc.                  |
+| `@luma-search/utils`         | URL canon, hashing, text chunking    | `canonicalizeUrl`, `simhash`, `chunkText`                           |
+| `@luma-search/telemetry`     | Pino logging, Prometheus metrics     | `createLogger`, `initMetrics`, `runHealthChecks`                    |
+| `@luma-search/storage`       | Prisma client + DB models            | `getPrismaClient`, Prisma models                                    |
+| `@luma-search/queue`         | BullMQ queue definitions             | `createWorker`, `createQueue`, job types                            |
+| `@luma-search/search-client` | ES client, index mgmt, hybrid search | `createSearchClient`, `IndexManager`, `buildHybridBody`             |
+| `@luma-search/crawler-core`  | Fetcher, parser, trap detection      | `createFetcher`, `parseHtml`, `crawlOrchestrator`                   |
+| `@luma-search/embeddings`    | Embedding provider adapters          | `LocalEmbeddingProvider`, `OpenAIEmbeddingProvider`                 |
+| `@luma-search/llm`           | LLM provider adapters                | `OpenAIChatProvider`, `AnthropicChatProvider`, `OllamaChatProvider` |
+| `@luma-search/query`         | Query parsing, intent detection      | `parseOperators`, `interpretQuery`                                  |
+| `@luma-search/evidence`      | Answer synthesis with citations      | `AnswerEngine`                                                      |
+| `@luma-search/ranking`       | Ranking profiles, signals            | (future)                                                            |
+| `@luma-search/auth`          | Auth adapters                        | (future)                                                            |
 
 ## Data Flow
 
 ### Search Request
+
 1. **API Gateway** receives `POST /api/v1/search`
 2. **Query Understanding** parses operators, detects intent
 3. **Search Client** builds ES query (lexical or hybrid)
@@ -64,6 +66,7 @@ LumaSearch is a modular, self-hostable search platform built as a TypeScript mon
 5. **API** formats response with highlights, facets, debug info
 
 ### Answer Generation
+
 1. **API Gateway** receives `POST /api/v1/answer`
 2. **AnswerEngine** retrieves evidence passages from ES
 3. **Prompt Injection Defense** sanitizes passages
@@ -72,6 +75,7 @@ LumaSearch is a modular, self-hostable search platform built as a TypeScript mon
 6. **API** returns answer with inline citations
 
 ### Crawl Pipeline
+
 1. **API** creates `CrawlJob` in Postgres
 2. **Worker** picks up `crawl:fetch` jobs from Redis
 3. **Fetcher** respects robots.txt, SSRF guards, circuit breakers
@@ -108,6 +112,7 @@ LumaSearch is a modular, self-hostable search platform built as a TypeScript mon
 ## Extensibility
 
 All external integrations go through adapters:
+
 - **Search backends**: Add new client implementing search interface
 - **Embedding providers**: Implement `EmbeddingProvider` interface
 - **LLM providers**: Implement `LLMProvider` interface
