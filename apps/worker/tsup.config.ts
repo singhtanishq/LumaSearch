@@ -10,5 +10,5 @@ export default defineConfig({
   target: 'node20',
   platform: 'node',
   outDir: 'dist',
-  external: ['@luma-search/*', 'bullmq', 'ioredis'],
+  external: ['@luma-search/*', 'bullmq', 'ioredis', '@elastic/elasticsearch'],
 });
