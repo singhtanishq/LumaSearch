@@ -1,4 +1,7 @@
-export const metadata = { title: 'LumaSearch Admin', description: 'Admin dashboard for LumaSearch' };
+export const metadata = {
+  title: 'LumaSearch Admin',
+  description: 'Admin dashboard for LumaSearch',
+};
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
